@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dime! Automated PDF Tax Engine (Smart Password Unlocker)</title>
+  <title>Dime! Automated PDF Statement & Tax Suite (Pro Control Edition)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
       --dime-green: #00d66c;
       --dime-dark: #0b132b;
+      --primary-blue: #0284c7;
+      --danger-red: #dc2626;
       --bg: #f1f5f9;
       --card: #ffffff;
       --border: #cbd5e1;
@@ -22,11 +24,11 @@
       padding: 20px;
       font-size: 14px;
     }
-    .container { max-width: 1340px; margin: 0 auto; }
+    .container { max-width: 1360px; margin: 0 auto; }
     .header {
       background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
       color: #fff;
-      padding: 20px 24px;
+      padding: 18px 24px;
       border-radius: 14px;
       margin-bottom: 20px;
       display: flex;
@@ -35,22 +37,52 @@
       flex-wrap: wrap;
       gap: 12px;
       border-left: 6px solid var(--dime-green);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
-    .header h1 { margin: 0; font-size: 1.35rem; color: var(--dime-green); }
-    .header p { margin: 4px 0 0; font-size: 0.86rem; color: #cbd5e1; }
+    .header h1 { margin: 0; font-size: 1.32rem; color: var(--dime-green); }
+    .header p { margin: 4px 0 0; font-size: 0.85rem; color: #cbd5e1; }
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
     .btn {
-      padding: 8px 14px;
+      padding: 9px 15px;
       border-radius: 8px;
       border: 1px solid transparent;
       font-weight: 600;
       cursor: pointer;
       transition: 0.15s;
       font-size: 0.86rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .btn-dime { background: var(--dime-green); color: #0b132b; }
+    .btn:active { transform: scale(0.98); }
+    .btn-calc {
+      background: var(--primary-blue);
+      color: #fff;
+      font-size: 0.95rem;
+      padding: 10px 18px;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+    }
+    .btn-calc:hover { background: #0369a1; }
+    .btn-reset {
+      background: var(--danger-red);
+      color: #fff;
+    }
+    .btn-reset:hover { background: #b91c1c; }
+    .btn-dime {
+      background: var(--dime-green);
+      color: #0b132b;
+    }
     .btn-dime:hover { filter: brightness(0.95); }
     .btn-dark { background: #1e293b; color: #fff; border-color: #334155; }
     .btn-outline { background: #fff; color: #334155; border-color: #cbd5e1; }
+    .btn-outline:hover { background: #f8fafc; }
+    .btn-sm { padding: 4px 10px; font-size: 0.78rem; border-radius: 6px; }
+
     .grid-main {
       display: grid;
       grid-template-columns: 1.55fr 1fr;
@@ -158,6 +190,10 @@
       padding: 20px;
       position: sticky;
       top: 20px;
+      transition: box-shadow 0.3s ease;
+    }
+    .flash-ring {
+      box-shadow: 0 0 0 4px var(--dime-green) !important;
     }
     .s-row {
       display: flex;
@@ -193,7 +229,7 @@
       padding: 10px;
       border-radius: 8px;
       margin-top: 8px;
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
       white-space: pre-wrap;
     }
@@ -201,63 +237,88 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .input-line input {
-      width: 150px;
-      padding: 6px 8px;
+      width: 170px;
+      padding: 7px 10px;
       border: 1px solid var(--border);
       border-radius: 6px;
       text-align: right;
+      font-size: 0.92rem;
+    }
+    .calc-banner {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      padding: 12px 16px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 0.76rem;
+      background: #1e293b;
+      color: #38bdf8;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
+  <!-- แถบหัวข้อพร้อมปุ่มควบคุมหลักครบชุด -->
   <div class="header">
     <div>
-      <h1>Dime! Automated PDF Statement & Tax Suite (Smart Password Unlocker)</h1>
-      <p>ระบบปลดล็อกไฟล์ PDF ที่ติดรหัสผ่านของแอป Dime! อัตโนมัติ (รองรับทั้งรหัสวันเกิด ค.ศ./พ.ศ. และ Prompt ถามรหัสทันทีเมื่อไฟล์ล็อก)</p>
+      <h1>Dime! Automated PDF Statement & Tax Suite</h1>
+      <p>เริ่มต้นด้วยค่าว่างพร้อมใช้งานจริง | มีปุ่มรีเซ็ตล้างค่าทั้งหมด | ปุ่มสั่งคำนวณภาษี | ระบบปลดล็อกรหัสผ่าน PDF อัตโนมัติ</p>
     </div>
-    <div>
+    <div class="action-bar">
+      <button class="btn btn-calc" onclick="triggerManualCalculate()">🧮 คำนวณภาษีเดี๋ยวนี้</button>
+      <button class="btn btn-reset" onclick="resetAllData()">🗑️ รีเซ็ตล้างค่าทั้งหมด (Reset)</button>
       <button class="btn btn-dime" onclick="loadDimeSample()">⚡ โหลดข้อมูลจำลอง (Demo)</button>
     </div>
   </div>
 
   <div class="grid-main">
     <div>
+      <!-- กล่องที่ 1: อัปโหลดและปลดล็อก PDF -->
       <div class="card">
         <h3>
           <span>1. ระบบปลดล็อกและอัปโหลดไฟล์ PDF สเตทเมนต์จากแอป Dime!</span>
-          <span style="font-size:0.76rem; color:#059669;">แก้ไขบั๊ก PDF ติดรหัสสมบูรณ์ 100%</span>
+          <span style="font-size:0.76rem; color:#059669;">พร้อมรับไฟล์จริงของคุณทันที</span>
         </h3>
 
-        <!-- กล่องตั้งค่ารหัสผ่านพร้อมระบบ Smart Bypass รูปแบบวันเกิด ค.ศ./พ.ศ. -->
         <div class="pw-panel">
           <div style="font-weight:700; color:#92400e; margin-bottom:6px;">
-            🔐 ระบบปลดล็อกไฟล์ PDF อัตโนมัติ (สำหรับไฟล์ Dime! หรือ 50 ทวิ ที่ติดรหัสผ่าน)
+            🔐 ขั้นตอนที่ 1: กรอกรหัสผ่านสำหรับปลดล็อกไฟล์ PDF (ถ้าไฟล์ของคุณมีรหัสล็อก)
           </div>
           <div class="pw-row">
-            <input type="password" id="pdfPassword" placeholder="กรอกรหัส เช่น 15081996" />
-            <button class="btn btn-outline" type="button" onclick="togglePasswordVisibility()">👁️ ดูรหัส</button>
-            <button class="btn btn-dark" type="button" onclick="retryUnlockCachedFiles()">🔓 ปลดล็อกและอ่านไฟล์ใหม่อีกครั้ง</button>
+            <input type="password" id="pdfPassword" placeholder="เช่น วันเกิด 15081996" />
+            <button class="btn btn-outline" type="button" onclick="togglePasswordVisibility()">👁️ ดู/ซ่อนรหัส</button>
+            <button class="btn btn-dark" type="button" onclick="retryUnlockCachedFiles()">🔓 ปลดล็อกและอ่านไฟล์ใหม่</button>
             <button class="btn btn-outline" type="button" onclick="toggleRawInspector()">🔍 ดูข้อความดิบใน PDF</button>
           </div>
           <div style="font-size:0.78rem; color:#78350f; margin-top:6px;">
-            💡 <strong>ทริค Smart Auto-Unlock:</strong> เพียงกรอกวันเกิด 8 หลัก (เช่น <code>DDMMYYYY</code>) ระบบจะลองปลดล็อกทั้งแบบ <strong>ค.ศ. และ พ.ศ. (+543/-543)</strong> ให้อัตโนมัติ หรือถ้าคุณโยนไฟล์เข้ามาเลยโดยยังไม่กรอก ระบบจะเด้งหน้าต่างให้ใส่รหัสทันที!
+            💡 <strong>ทริค:</strong> หากใส่รหัสวันเกิด ค.ศ. หรือ พ.ศ. ไว้ในช่องนี้ก่อนเลือกไฟล์ ระบบจะปลดล็อกให้อัตโนมัติทันที หรือถ้าโยนไฟล์เข้าไปก่อน ระบบจะเด้งหน้าต่างถามรหัสผ่านครับ
           </div>
         </div>
 
         <div class="dropzone" onclick="document.getElementById('dimePdf').click()">
-          <strong style="color:#047857; font-size:1rem;">📄 คลิกเพื่อเลือกไฟล์ PDF จากแอป Dime! (เลือกได้หลายไฟล์พร้อมกัน)</strong>
+          <strong style="color:#047857; font-size:1.02rem;">📄 ขั้นตอนที่ 2: คลิกที่นี่เพื่อเลือกไฟล์ PDF จากแอป Dime! (เลือกได้หลายไฟล์พร้อมกัน)</strong>
           <div style="font-size:0.8rem; color:#475569; margin-top:4px;">
-            รองรับไฟล์ที่เข้ารหัส AES-128 / AES-256 ทุกเวอร์ชัน (ประมวลผลในเครื่องของคุณเอง 100%)
+            เมื่ออัปโหลดสำเร็จ ระบบจะดึงรายการเข้าตารางด้านล่างและคำนวณภาษีให้อัตโนมัติ (ประมวลผลในเครื่อง 100%)
           </div>
           <input type="file" id="dimePdf" accept="application/pdf" multiple style="display:none" onchange="handleFileSelect(event)">
         </div>
 
-        <div id="dimeLog" class="log-box">สถานะ: พร้อมรับไฟล์ PDF...</div>
+        <div id="dimeLog" class="log-box">สถานะ: ล้างข้อมูลเป็นค่าเริ่มต้น (0.00) เรียบร้อยแล้ว! กรุณาอัปโหลดไฟล์ PDF ของคุณ หรือกรอกข้อมูลด้านล่าง แล้วกดปุ่ม "🧮 คำนวณภาษีเดี๋ยวนี้"...</div>
         <div id="rawPdfText" class="raw-box">ยังไม่มีข้อความจากไฟล์ PDF...</div>
 
         <div class="kpi-grid">
@@ -284,9 +345,12 @@
         </div>
       </div>
 
-      <!-- ตาราง FX -->
+      <!-- ตารางที่ 2: FX -->
       <div class="card">
-        <h3>2. ประวัติการแลกเงิน THB ↔ USD ในแอป Dime!</h3>
+        <h3>
+          <span>2. ประวัติการแลกเงิน THB ↔ USD ในแอป Dime!</span>
+          <button class="btn btn-outline btn-sm" onclick="addManualFxRow()">+ เพิ่มรายการแลกเงินด้วยตนเอง</button>
+        </h3>
         <table>
           <thead>
             <tr>
@@ -296,15 +360,19 @@
               <th>เรท</th>
               <th>THB</th>
               <th>สถานะภาษี</th>
+              <th>ลบ</th>
             </tr>
           </thead>
           <tbody id="tb_fx"></tbody>
         </table>
       </div>
 
-      <!-- ตาราง Trades -->
+      <!-- ตารางที่ 3: Trades -->
       <div class="card">
-        <h3>3. รายการซื้อ-ขายหุ้นสหรัฐฯ (FIFO Fractional Shares)</h3>
+        <h3>
+          <span>3. รายการซื้อ-ขายหุ้นสหรัฐฯ (FIFO Fractional Shares)</span>
+          <button class="btn btn-outline btn-sm" onclick="addManualTradeRow()">+ เพิ่มรายการซื้อ/ขายหุ้น</button>
+        </h3>
         <table>
           <thead>
             <tr>
@@ -315,15 +383,19 @@
               <th>ราคา/หุ้น</th>
               <th>รวม (USD)</th>
               <th>กำไร/ขาดทุน FIFO</th>
+              <th>ลบ</th>
             </tr>
           </thead>
           <tbody id="tb_trades"></tbody>
         </table>
       </div>
 
-      <!-- ตาราง Div -->
+      <!-- ตารางที่ 4: Dividends -->
       <div class="card">
-        <h3>4. เงินปันผล & ดอกเบี้ย FCD (USD)</h3>
+        <h3>
+          <span>4. เงินปันผล & ดอกเบี้ย FCD (USD)</span>
+          <button class="btn btn-outline btn-sm" onclick="addManualDivRow()">+ เพิ่มรายการปันผล</button>
+        </h3>
         <table>
           <thead>
             <tr>
@@ -332,32 +404,44 @@
               <th>Gross (USD)</th>
               <th>WHT (USD)</th>
               <th>Net (USD)</th>
+              <th>ลบ</th>
             </tr>
           </thead>
           <tbody id="tb_divs"></tbody>
         </table>
       </div>
 
-      <!-- ข้อมูลไทย -->
+      <!-- กล่องที่ 5: เงินเดือนไทย + ปุ่มสั่งคำนวณ/รีเซ็ต -->
       <div class="card">
-        <h3>5. เงินเดือนในไทย (40(1)) และค่าลดหย่อน</h3>
+        <h3>5. ข้อมูลเงินได้ในไทย (มาตรา 40(1)) และค่าลดหย่อน</h3>
         <div class="input-line">
-          <label>เงินเดือนและโบนัสทั้งปี (บาท):</label>
-          <input type="number" id="in_salary" value="840000" oninput="calcDimeTax()">
+          <label>เงินเดือนและโบนัสทั้งปีในไทย (บาท):</label>
+          <input type="number" id="in_salary" value="0" oninput="calcDimeTax()">
         </div>
         <div class="input-line">
-          <label>ภาษีหัก ณ ที่จ่ายสะสม (บาท):</label>
-          <input type="number" id="in_wht" value="35000" oninput="calcDimeTax()">
+          <label>ภาษีหัก ณ ที่จ่ายสะสมในไทย ตามใบ 50 ทวิ (บาท):</label>
+          <input type="number" id="in_wht" value="0" oninput="calcDimeTax()">
         </div>
         <div class="input-line">
-          <label>รวมค่าลดหย่อน (บาท):</label>
-          <input type="number" id="in_deduct" value="219000" oninput="calcDimeTax()">
+          <label>รวมค่าลดหย่อนทุกหมวด (ค่าเริ่มต้น 60,000 คือลดหย่อนส่วนตัวพื้นฐาน) (บาท):</label>
+          <input type="number" id="in_deduct" value="60000" oninput="calcDimeTax()">
+        </div>
+
+        <div class="calc-banner">
+          <div style="font-size:0.86rem; color:#0369a1;">
+            <strong>พร้อมคำนวณภาษีหรือยัง?</strong> คุณสามารถกดปุ่มคำนวณด้านขวานี้เพื่อสรุปยอดภาษีล่าสุด หรือกดรีเซ็ตเพื่อเริ่มใหม่ทั้งหมด
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-reset" type="button" onclick="resetAllData()">🗑️ ล้างค่าทั้งหมด</button>
+            <button class="btn btn-calc" type="button" onclick="triggerManualCalculate()">🧮 คำนวณภาษีเดี๋ยวนี้</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- สรุปฝั่งขวา -->
-    <div class="summary-box">
+    <!-- แผงสรุปภาษีฝั่งขวา -->
+    <div class="summary-box" id="summaryPanel">
+      <div class="status-pill" id="calcTimestamp">สถานะ: พร้อมคำนวณ (ค่าเริ่มต้น 0.00)</div>
       <h3 style="margin:0 0 12px; color:var(--dime-green);">สรุปภาษีพอร์ต Dime! + ภ.ง.ด. 90</h3>
       <div class="s-row"><span>เงินได้ในไทย:</span><span id="s_salary">0.00 บาท</span></div>
       <div class="s-row"><span>กำไรขายหุ้นสุทธิ (FIFO):</span><span id="s_fifo_gain">$0.00</span></div>
@@ -366,13 +450,20 @@
       <div class="s-row" style="color:#86efac;"><span>• หักเงินต้น (ปลอดภาษี):</span><span id="s_prin_usd">$0.00</span></div>
       <div class="s-row" style="color:#fde047; font-weight:700;"><span>• ส่วนกำไร (คิดภาษี):</span><span id="s_tax_fx_thb">0.00 บาท</span></div>
       <div class="s-row"><span>รวมเงินได้พึงประเมิน:</span><span id="s_gross">0.00 บาท</span></div>
-      <div class="s-row"><span>หัก ค่าใช้จ่าย:</span><span id="s_exp">0.00 บาท</span></div>
-      <div class="s-row"><span>หัก ค่าลดหย่อน:</span><span id="s_ded">0.00 บาท</span></div>
-      <div class="s-row" style="color:#4ade80; font-weight:700;"><span>เงินได้สุทธิ:</span><span id="s_net">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ค่าใช้จ่าย (50% ไม่เกิน 100,000):</span><span id="s_exp">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ค่าลดหย่อนรวม:</span><span id="s_ded">60,000.00 บาท</span></div>
+      <div class="s-row" style="color:#4ade80; font-weight:700;"><span>เงินได้สุทธิ (Net Taxable Income):</span><span id="s_net">0.00 บาท</span></div>
       <div class="s-row"><span>ภาษีตามขั้นบันได:</span><span id="s_tax_prog">0.00 บาท</span></div>
       <div class="s-row" style="color:#38bdf8;"><span>หัก เครดิตภาษีปันผล US:</span><span id="s_ftc">0.00 บาท</span></div>
       <div class="s-row"><span>หัก ภาษีหัก ณ ที่จ่ายไทย:</span><span id="s_wht_th">0.00 บาท</span></div>
-      <div class="s-total" id="s_final">0.00 บาท</div>
+      <div class="s-total" id="s_final">0.00 บาท (ไม่มีภาษีต้องชำระ)</div>
+
+      <div style="margin-top:14px; display:flex; gap:8px;">
+        <button class="btn btn-calc" style="width:100%; justify-content:center;" onclick="triggerManualCalculate()">
+          🔄 กดเพื่ออัปเดตผลการคำนวณภาษี
+        </button>
+      </div>
+
       <div id="s_note" style="margin-top:12px; background:#1c2541; padding:12px; border-radius:8px; font-size:0.82rem; line-height:1.5;"></div>
     </div>
   </div>
@@ -382,9 +473,88 @@
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
   let dimeState = { fxList: [], rawTrades: [], divList: [] };
-  let cachedFiles = []; // เก็บไฟล์ที่อัปโหลดไว้ในหน่วยความจำ เพื่อให้กดลองปลดล็อกซ้ำได้ทันที
+  let cachedFiles = [];
 
   const fmt = (n, d = 2) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  // ฟังก์ชันรีเซ็ตล้างค่าทั้งหมดกลับเป็น 0 (Clean Reset)
+  function resetAllData() {
+    dimeState = { fxList: [], rawTrades: [], divList: [] };
+    cachedFiles = [];
+    document.getElementById('dimePdf').value = '';
+    document.getElementById('pdfPassword').value = '';
+    document.getElementById('in_salary').value = 0;
+    document.getElementById('in_wht').value = 0;
+    document.getElementById('in_deduct').value = 60000; // ค่าลดหย่อนส่วนตัวพื้นฐาน 60,000 บาท
+    document.getElementById('rawPdfText').textContent = 'ยังไม่มีข้อความจากไฟล์ PDF...';
+    document.getElementById('dimeLog').textContent =
+      '🗑️ รีเซ็ตล้างข้อมูลทั้งหมดกลับเป็น 0.00 เรียบร้อยแล้ว!\n' +
+      'พร้อมสำหรับการอัปโหลดไฟล์ PDF ของคุณ หรือกรอกตัวเลขใหม่แล้วกดปุ่ม "🧮 คำนวณภาษีเดี๋ยวนี้"';
+    calcDimeTax();
+    document.getElementById('calcTimestamp').textContent = 'สถานะ: ล้างข้อมูลทั้งหมดแล้ว (0.00)';
+  }
+
+  // ฟังก์ชันเมื่อผู้ใช้กดปุ่ม "คำนวณภาษีเดี๋ยวนี้"
+  function triggerManualCalculate() {
+    calcDimeTax();
+    const now = new Date().toLocaleTimeString('th-TH');
+    document.getElementById('calcTimestamp').textContent = `✔ คำนวณล่าสุดเมื่อเวลา ${now}`;
+    const panel = document.getElementById('summaryPanel');
+    panel.classList.add('flash-ring');
+    setTimeout(() => panel.classList.remove('flash-ring'), 600);
+  }
+
+  // ฟังก์ชันลบแถวในตาราง
+  function removeRow(listName, idx) {
+    dimeState[listName].splice(idx, 1);
+    calcDimeTax();
+  }
+
+  // ฟังก์ชันเพิ่มรายการด้วยตนเองเผื่อผู้ใช้ต้องการคีย์เสริม
+  function addManualFxRow() {
+    const dirInput = prompt('พิมพ์ 1 สำหรับ "แลกบาทเป็นดอลลาร์ (THB -> USD)" หรือพิมพ์ 2 สำหรับ "แลกดอลลาร์กลับเป็นบาท (USD -> THB)":', '1');
+    if (!dirInput) return;
+    const usd = parseFloat(prompt('จำนวนเงินดอลลาร์ (USD):', '1000')) || 0;
+    const rate = parseFloat(prompt('เรทอัตราแลกเปลี่ยน (บาท/USD):', '34.00')) || 34;
+    dimeState.fxList.push({
+      date: new Date().toISOString().slice(0, 10),
+      dir: dirInput.trim() === '2' ? 'USD_TO_THB' : 'THB_TO_USD',
+      usd: usd,
+      rate: rate
+    });
+    triggerManualCalculate();
+  }
+
+  function addManualTradeRow() {
+    const ticker = (prompt('ชื่อย่อหุ้น (เช่น NVDA, AAPL, TSLA):', 'NVDA') || 'NVDA').toUpperCase();
+    const sideInput = prompt('พิมพ์ BUY (ซื้อ) หรือ SELL (ขาย):', 'BUY');
+    if (!sideInput) return;
+    const side = sideInput.trim().toUpperCase() === 'SELL' ? 'SELL' : 'BUY';
+    const shares = parseFloat(prompt('จำนวนหุ้น (ทศนิยมได้):', '10')) || 0;
+    const price = parseFloat(prompt('ราคาต่อหุ้น (USD):', '120')) || 0;
+    dimeState.rawTrades.push({
+      date: new Date().toISOString().slice(0, 10),
+      side: side,
+      ticker: ticker,
+      shares: shares,
+      price: price,
+      amountUsd: shares * price
+    });
+    triggerManualCalculate();
+  }
+
+  function addManualDivRow() {
+    const ticker = (prompt('ชื่อหุ้นหรือรายการดอกเบี้ย (เช่น AAPL Dividend):', 'AAPL Dividend') || 'Dividend');
+    const gross = parseFloat(prompt('ยอดปันผลก่อนหักภาษี (Gross USD):', '50')) || 0;
+    const wht = parseFloat(prompt('ภาษีหัก ณ ที่จ่ายต่างประเทศ (WHT USD - ปกติ 15%):', String((gross * 0.15).toFixed(2)))) || 0;
+    dimeState.divList.push({
+      date: new Date().toISOString().slice(0, 10),
+      ticker: ticker,
+      grossUsd: gross,
+      whtUsd: wht
+    });
+    triggerManualCalculate();
+  }
 
   function togglePasswordVisibility() {
     const pwInput = document.getElementById('pdfPassword');
@@ -396,69 +566,43 @@
     box.style.display = box.style.display === 'block' ? 'none' : 'block';
   }
 
-  // สร้างชุดรหัสผ่านอัตโนมัติ (เช่น ถ้าใส่ ค.ศ. จะสร้าง พ.ศ. เผื่อไว้ให้ด้วย หรือตัดเครื่องหมาย / - ออก)
   function generatePasswordCandidates(rawPw) {
     if (!rawPw) return [''];
     const clean = rawPw.trim().replace(/[-/\s]/g, '');
     const list = [rawPw.trim(), clean];
-
-    // ถ้าเป็นตัวเลข 8 หลัก (DDMMYYYY) ลองสลับปี ค.ศ. <-> พ.ศ. (+/- 543) อัตโนมัติ
     if (/^\d{8}$/.test(clean)) {
       const ddmm = clean.substring(0, 4);
       const yyyy = parseInt(clean.substring(4, 8), 10);
-      if (yyyy > 2400) {
-        list.push(ddmm + String(yyyy - 543)); // แปลง พ.ศ. เป็น ค.ศ.
-      } else if (yyyy > 1900 && yyyy < 2100) {
-        list.push(ddmm + String(yyyy + 543)); // แปลง ค.ศ. เป็น พ.ศ.
-      }
+      if (yyyy > 2400) list.push(ddmm + String(yyyy - 543));
+      else if (yyyy > 1900 && yyyy < 2100) list.push(ddmm + String(yyyy + 543));
     }
     return [...new Set(list)];
   }
 
-  // ฟังก์ชันเปิดไฟล์ PDF ที่รองรับการลองรหัสผ่านหลายรูปแบบ + เด้งถามรหัสเมื่อไฟล์ล็อก
   async function openPdfWithSmartUnlock(arrayBuffer, fileName, initialPassword, logEl) {
     const candidates = generatePasswordCandidates(initialPassword);
-
-    // 1. ลองปลดล็อกด้วยชุดรหัสผ่านในช่องกรอกก่อน
     for (const candidate of candidates) {
       try {
-        const loadingTask = pdfjsLib.getDocument({
-          data: arrayBuffer.slice(0),
-          password: candidate
-        });
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer.slice(0), password: candidate });
         const pdfDoc = await loadingTask.promise;
-        if (candidate) {
-          logEl.textContent += `🔓 ปลดล็อกไฟล์ "${fileName}" สำเร็จด้วยรหัสผ่าน!\n`;
-        }
+        if (candidate) logEl.textContent += `🔓 ปลดล็อกไฟล์ "${fileName}" สำเร็จด้วยรหัสผ่าน!\n`;
         return pdfDoc;
       } catch (err) {
-        // หากยังไม่ใช่รหัสที่ถูก ให้วนลองตัวถัดไป
-        if (err.name !== 'PasswordException') {
-          throw err;
-        }
+        if (err.name !== 'PasswordException') throw err;
       }
     }
 
-    // 2. หากยังไม่ได้กรอกรหัส หรือรหัสที่กรอกไว้ยังไม่ผ่าน ให้เด้งหน้าต่างถามผู้ใช้ทันที (Interactive Prompt)
     while (true) {
       const userPromptPw = window.prompt(
-        `🔒 ไฟล์ "${fileName}" ติดรหัสผ่าน!\nกรุณากรอกรหัสผ่านเพื่อปลดล็อกไฟล์ (เช่น วันเดือนปีเกิด ค.ศ. DDMMYYYY หรือ พ.ศ.):`,
+        `🔒 ไฟล์ "${fileName}" ติดรหัสผ่าน!\nกรุณากรอกรหัสผ่านเพื่อปลดล็อกไฟล์ (เช่น วันเกิด DDMMYYYY):`,
         document.getElementById('pdfPassword').value || ''
       );
-
-      if (userPromptPw === null) {
-        throw new Error('ผู้ใช้ยกเลิกการกรอกรหัสผ่าน');
-      }
-
+      if (userPromptPw === null) throw new Error('ผู้ใช้ยกเลิกการกรอกรหัสผ่าน');
       document.getElementById('pdfPassword').value = userPromptPw;
       const retryCandidates = generatePasswordCandidates(userPromptPw);
-
       for (const cand of retryCandidates) {
         try {
-          const task = pdfjsLib.getDocument({
-            data: arrayBuffer.slice(0),
-            password: cand
-          });
+          const task = pdfjsLib.getDocument({ data: arrayBuffer.slice(0), password: cand });
           const pdfDoc = await task.promise;
           logEl.textContent += `🔓 ปลดล็อกไฟล์ "${fileName}" สำเร็จ!\n`;
           return pdfDoc;
@@ -474,14 +618,13 @@
     const files = Array.from(event.target.files);
     if (!files.length) return;
     cachedFiles = files;
-    // รีเซ็ตค่า input เพื่อให้เลือกไฟล์เดิมซ้ำได้ถ้าต้องการ
     event.target.value = '';
     await processAllFiles(cachedFiles);
   }
 
   async function retryUnlockCachedFiles() {
     if (!cachedFiles.length) {
-      alert('กรุณาคลิกเลือกไฟล์ PDF ก่อนครับ');
+      alert('กรุณาคลิกเลือกไฟล์ PDF ในกรอบสีเขียวก่อนครับ');
       return;
     }
     await processAllFiles(cachedFiles);
@@ -509,7 +652,6 @@
 
         rawBox.textContent += `=== ข้อความจากไฟล์: ${file.name} (${pdf.numPages} หน้า) ===\n${text}\n\n`;
 
-        // สกัดข้อมูลแลกเงิน THB <-> USD (ครอบคลุมหลายรูปแบบคำใน Dime! Statement)
         const fxOutRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}|\d{2}\s+[A-Za-z]{3}\s+\d{4}).*?(?:THB\s*to\s*USD|แลกเงินบาท|Buy\s*USD|Deposit|ฝากเงิน).*?([\d,]+\.\d{2})\s*(?:USD)?.*?([\d]{2}\.\d{2,4})/gi;
         let m;
         while ((m = fxOutRe.exec(text)) !== null) {
@@ -521,42 +663,36 @@
           dimeState.fxList.push({ date: m[1], dir: 'USD_TO_THB', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
         }
 
-        // สกัดรายการซื้อ-ขายหุ้นเศษส่วน (รองรับทศนิยมตั้งแต่ 2 ถึง 8 ตำแหน่ง)
         const tradeRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}|\d{2}\s+[A-Za-z]{3}\s+\d{4})\s+(BUY|SELL|ซื้อ|ขาย)\s+([A-Z]{1,5})\s+(\d+(?:\.\d{1,8})?)\s+\$?([\d,]+\.\d{2,4})\s+\$?([\d,]+\.\d{2})/gi;
         while ((m = tradeRe.exec(text)) !== null) {
           const sideRaw = m[2].toUpperCase();
           const side = (sideRaw === 'ซื้อ' || sideRaw === 'BUY') ? 'BUY' : 'SELL';
           dimeState.rawTrades.push({
-            date: m[1],
-            side: side,
-            ticker: m[3].toUpperCase(),
-            shares: parseFloat(m[4]),
-            price: parseFloat(m[5].replace(/,/g, '')),
-            amountUsd: parseFloat(m[6].replace(/,/g, ''))
+            date: m[1], side: side, ticker: m[3].toUpperCase(),
+            shares: parseFloat(m[4]), price: parseFloat(m[5].replace(/,/g, '')), amountUsd: parseFloat(m[6].replace(/,/g, ''))
           });
         }
 
-        // สกัดเงินปันผลและภาษีหัก ณ ที่จ่าย
         const divRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}|\d{2}\s+[A-Za-z]{3}\s+\d{4}).*?(?:Dividend|ปันผล)\s+([A-Z]{1,5}).*?\$?([\d,]+\.\d{2}).*?\$?([\d,]+\.\d{2})/gi;
         while ((m = divRe.exec(text)) !== null) {
           dimeState.divList.push({
-            date: m[1],
-            ticker: m[2],
-            grossUsd: parseFloat(m[3].replace(/,/g, '')),
-            whtUsd: parseFloat(m[4].replace(/,/g, ''))
+            date: m[1], ticker: m[2], grossUsd: parseFloat(m[3].replace(/,/g, '')), whtUsd: parseFloat(m[4].replace(/,/g, ''))
           });
         }
 
-        log.textContent += `✔ อ่านเนื้อหาไฟล์ "${file.name}" (${pdf.numPages} หน้า) เรียบร้อยแล้ว (กดปุ่ม "🔍 ดูข้อความดิบใน PDF" เพื่อตรวจสอบข้อความทั้งหมดได้)\n`;
+        log.textContent += `✔ อ่านไฟล์ "${file.name}" (${pdf.numPages} หน้า) สำเร็จ! (สกัดพบ: แลกเงิน ${dimeState.fxList.length} รายการ | หุ้น ${dimeState.rawTrades.length} รายการ | ปันผล ${dimeState.divList.length} รายการ)\n`;
       } catch (err) {
         log.textContent += `❌ ไม่สามารถเปิดไฟล์ "${file.name}": ${err.message}\n`;
       }
     }
-    calcDimeTax();
+    triggerManualCalculate();
   }
 
   function loadDimeSample() {
     document.getElementById('pdfPassword').value = '15081996';
+    document.getElementById('in_salary').value = 840000;
+    document.getElementById('in_wht').value = 35000;
+    document.getElementById('in_deduct').value = 219000;
     dimeState = {
       fxList: [
         { date: '2026-01-10', dir: 'THB_TO_USD', usd: 3000.00, rate: 34.45 },
@@ -578,13 +714,13 @@
       ]
     };
     document.getElementById('dimeLog').textContent =
-      `✔ [โหลดข้อมูลตัวอย่างสำเร็จ]: พร้อมรับไฟล์ PDF จริงของคุณ (หากไฟล์ติดรหัสผ่าน ระบบจะปลดล็อกให้อัตโนมัติหรือเด้งถามรหัสทันที)`;
-    calcDimeTax();
+      `⚡ [โหลดข้อมูลจำลอง Demo สำเร็จ]: หากต้องการเริ่มใช้งานจริงกับไฟล์ของคุณ ให้กดปุ่มสีแดง "🗑️ รีเซ็ตล้างค่าทั้งหมด (Reset)" ด้านบนได้เลยครับ`;
+    triggerManualCalculate();
   }
 
   function calcDimeTax() {
     let inventory = {}, totalRealizedGain = 0, totalRealizedLoss = 0;
-    const tradeRows = dimeState.rawTrades.map(t => {
+    const tradeRows = dimeState.rawTrades.map((t, idx) => {
       if (!inventory[t.ticker]) inventory[t.ticker] = [];
       let pnlCell = `-`;
       if (t.side === 'BUY') {
@@ -603,12 +739,21 @@
         if (pnl >= 0) { totalRealizedGain += pnl; pnlCell = `<span class="badge b-gain">+$${fmt(pnl)}</span>`; }
         else { totalRealizedLoss += Math.abs(pnl); pnlCell = `<span class="badge b-loss">-$${fmt(Math.abs(pnl))}</span>`; }
       }
-      return `<tr><td>${t.date}</td><td><strong>${t.ticker}</strong></td><td style="text-align:center;"><span class="badge ${t.side==='BUY'?'b-buy':'b-sell'}">${t.side}</span></td><td>${fmt(t.shares,7)}</td><td>$${fmt(t.price)}</td><td>$${fmt(t.amountUsd)}</td><td>${pnlCell}</td></tr>`;
+      return `<tr>
+        <td>${t.date}</td>
+        <td><strong>${t.ticker}</strong></td>
+        <td style="text-align:center;"><span class="badge ${t.side==='BUY'?'b-buy':'b-sell'}">${t.side}</span></td>
+        <td>${fmt(t.shares,7)}</td>
+        <td>$${fmt(t.price)}</td>
+        <td>$${fmt(t.amountUsd)}</td>
+        <td>${pnlCell}</td>
+        <td style="text-align:center;"><button class="btn btn-outline btn-sm" onclick="removeRow('rawTrades', ${idx})">✕</button></td>
+      </tr>`;
     }).join('');
-    document.getElementById('tb_trades').innerHTML = tradeRows || `<tr><td colspan="7" style="text-align:center;">ยังไม่มีรายการซื้อ-ขายหุ้น</td></tr>`;
+    document.getElementById('tb_trades').innerHTML = tradeRows || `<tr><td colspan="8" style="text-align:center; color:#64748b;">ไม่มีรายการซื้อ-ขายหุ้น (อัปโหลดไฟล์ PDF หรือกดปุ่ม + เพิ่มรายการด้านบน)</td></tr>`;
 
     let outUsd = 0, outThb = 0, inUsd = 0, inThb = 0, prin = 0;
-    const fxRows = dimeState.fxList.map(f => {
+    const fxRows = dimeState.fxList.map((f, idx) => {
       let thb = f.usd * f.rate, stat = '';
       if (f.dir === 'THB_TO_USD') {
         outUsd += f.usd; outThb += thb; prin += f.usd;
@@ -622,16 +767,31 @@
           ? `<span class="badge b-gain">คืนเงินต้น $${fmt(pUsd)} + กำไรนำเข้า $${fmt(profUsd)}</span>`
           : `<span class="badge b-buy">คืนเงินต้น $${fmt(pUsd)} (ปลอดภาษี)</span>`;
       }
-      return `<tr><td>${f.date}</td><td>${f.dir === 'THB_TO_USD' ? 'แลก THB ➔ USD' : 'แลก USD ➔ THB'}</td><td>$${fmt(f.usd)}</td><td>${fmt(f.rate)}</td><td>${fmt(thb)} บาท</td><td style="text-align:left;">${stat}</td></tr>`;
+      return `<tr>
+        <td>${f.date}</td>
+        <td>${f.dir === 'THB_TO_USD' ? 'แลก THB ➔ USD' : 'แลก USD ➔ THB'}</td>
+        <td>$${fmt(f.usd)}</td>
+        <td>${fmt(f.rate)}</td>
+        <td>${fmt(thb)} บาท</td>
+        <td style="text-align:left;">${stat}</td>
+        <td style="text-align:center;"><button class="btn btn-outline btn-sm" onclick="removeRow('fxList', ${idx})">✕</button></td>
+      </tr>`;
     }).join('');
-    document.getElementById('tb_fx').innerHTML = fxRows || `<tr><td colspan="6" style="text-align:center;">ยังไม่มีรายการแลกเงิน</td></tr>`;
+    document.getElementById('tb_fx').innerHTML = fxRows || `<tr><td colspan="7" style="text-align:center; color:#64748b;">ไม่มีรายการแลกเงิน (อัปโหลดไฟล์ PDF หรือกดปุ่ม + เพิ่มรายการด้านบน)</td></tr>`;
 
     let grossDiv = 0, wht = 0;
-    const divRows = dimeState.divList.map(d => {
+    const divRows = dimeState.divList.map((d, idx) => {
       grossDiv += d.grossUsd; wht += d.whtUsd;
-      return `<tr><td>${d.date}</td><td><strong>${d.ticker}</strong></td><td>$${fmt(d.grossUsd)}</td><td style="color:#d97706;">-$${fmt(d.whtUsd)}</td><td>$${fmt(d.grossUsd - d.whtUsd)}</td></tr>`;
+      return `<tr>
+        <td>${d.date}</td>
+        <td><strong>${d.ticker}</strong></td>
+        <td>$${fmt(d.grossUsd)}</td>
+        <td style="color:#d97706;">-$${fmt(d.whtUsd)}</td>
+        <td>$${fmt(d.grossUsd - d.whtUsd)}</td>
+        <td style="text-align:center;"><button class="btn btn-outline btn-sm" onclick="removeRow('divList', ${idx})">✕</button></td>
+      </tr>`;
     }).join('');
-    document.getElementById('tb_divs').innerHTML = divRows || `<tr><td colspan="5" style="text-align:center;">ยังไม่มีรายการปันผล</td></tr>`;
+    document.getElementById('tb_divs').innerHTML = divRows || `<tr><td colspan="6" style="text-align:center; color:#64748b;">ไม่มีรายการเงินปันผลต่างประเทศ</td></tr>`;
 
     const netPnl = Math.max(0, totalRealizedGain - totalRealizedLoss);
     const totalProf = netPnl + grossDiv;
@@ -682,15 +842,27 @@
     document.getElementById('s_tax_prog').textContent = `${fmt(tax)} บาท`;
     document.getElementById('s_ftc').textContent = `${fmt(ftc)} บาท`;
     document.getElementById('s_wht_th').textContent = `${fmt(whtTh)} บาท`;
-    document.getElementById('s_final').textContent = `${fmt(Math.abs(final))} บาท (${final >= 0 ? 'ชำระเพิ่ม' : 'ได้เงินคืน'})`;
+
+    const finalEl = document.getElementById('s_final');
+    if (final > 0) {
+      finalEl.textContent = `${fmt(final)} บาท (ชำระเพิ่ม)`;
+      finalEl.style.color = '#f87171';
+    } else if (final < 0) {
+      finalEl.textContent = `${fmt(Math.abs(final))} บาท (ได้เงินคืนภาษี)`;
+      finalEl.style.color = '#00d66c';
+    } else {
+      finalEl.textContent = `0.00 บาท (ไม่มีภาษีต้องชำระเพิ่ม)`;
+      finalEl.style.color = '#38bdf8';
+    }
 
     document.getElementById('s_note').innerHTML =
-      `<strong>วิธีตรวจสอบว่าไฟล์ PDF ของคุณถูกดึงข้อมูลครบหรือไม่:</strong><br>` +
-      `หลังจากปลดล็อกไฟล์สำเร็จ ให้กดปุ่ม <strong>"🔍 ดูข้อความดิบใน PDF"</strong> ด้านบน หากตารางในไฟล์ PDF ของคุณจัดเรียงคอลัมน์ต่างจากมาตรฐาน คุณสามารถคัดลอกข้อความดิบในกล่องนั้นมาวางในแชทนี้เพื่อให้ผมจูน Regex ให้ตรงกับไฟล์ของคุณ 100% ได้เลยครับ`;
+      `<strong>คำแนะนำการใช้งาน:</strong><br>` +
+      `• กดปุ่ม <strong>"🗑️ รีเซ็ตล้างค่าทั้งหมด"</strong> เมื่อต้องการเริ่มคำนวณใหม่จากศูนย์<br>` +
+      `• หลังจากอัปโหลดไฟล์ PDF ของ Dime! แล้ว หากต้องการดูว่าในไฟล์มีข้อความจัดวางอย่างไร ให้กดปุ่ม <strong>"🔍 ดูข้อความดิบใน PDF"</strong> ด้านบนได้เลยครับ`;
   }
 
-  // เรียกฟังก์ชันเริ่มต้นอย่างถูกต้อง (แก้ไขบั๊กจากรอบที่แล้ว)
-  loadDimeSample();
+  // เริ่มต้นหน้าเว็บด้วยค่าว่าง 0.00 (ไม่ยัดข้อมูล Demo มาปนตั้งแต่แรก)
+  resetAllData();
 </script>
 </body>
 </html>
