@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dime! (KKP Dime) Automated PDF Tax Calculator - มาตรฐานกรมสรรพากร 100%</title>
+  <title>Dime! Automated PDF Tax Engine (Support Password-Protected PDF)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
@@ -46,10 +46,7 @@
       cursor: pointer;
       transition: 0.15s;
     }
-    .btn-dime {
-      background: var(--dime-green);
-      color: #0b132b;
-    }
+    .btn-dime { background: var(--dime-green); color: #0b132b; }
     .btn-dime:hover { opacity: 0.9; }
     .grid-main {
       display: grid;
@@ -76,6 +73,22 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    .password-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .password-box input {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 180px;
     }
     .dropzone {
       border: 2px dashed #00b85c;
@@ -180,149 +193,147 @@
 <div class="container">
   <div class="header">
     <div>
-      <h1>Dime! (KKP Dime) Automated PDF Statement & Tax Engine</h1>
-      <p>สกัดข้อมูลจากไฟล์ PDF ของแอป Dime! อัตโนมัติ: คำนวณเศษหุ้น (Fractional Shares แบบ FIFO), แลกเงิน THB↔USD, ปันผล W-8BEN 15% และดอกเบี้ย FCD</p>
+      <h1>Dime! Automated PDF Statement & Tax Engine (Password Protected Support)</h1>
+      <p>ระบบปลดล็อก PDF อัตโนมัติด้วยรหัสผ่าน (เช่น วันเดือนปีเกิด DDMMYYYY) พร้อมคำนวณภาษีตามมาตรฐานกรมสรรพากร 100%</p>
     </div>
     <div>
-      <button class="btn btn-dime" onclick="loadDimeSample()">⚡ กดจำลองไฟล์ PDF สเตทเมนต์จากแอป Dime!</button>
+      <button class="btn btn-dime" onclick="loadDimeSample()">⚡ โหลดข้อมูลจำลอง (Demo)</button>
     </div>
   </div>
 
   <div class="grid-main">
     <div>
-      <!-- กล่องอัปโหลดไฟล์ PDF ของ Dime! -->
       <div class="card">
         <h3>
-          <span>1. อัปโหลดไฟล์ PDF สเตทเมนต์จากแอป Dime! (Monthly Statement / Trade Confirm)</span>
-          <span style="font-size:0.76rem; color:#059669;">รองรับเศษหุ้นทศนิยม 7 ตำแหน่ง & FIFO อัตโนมัติ</span>
+          <span>1. อัปโหลดไฟล์ PDF สเตทเมนต์จากแอป Dime!</span>
+          <span style="font-size:0.76rem; color:#059669;">รองรับไฟล์เข้ารหัสผ่าน</span>
         </h3>
+        
+        <!-- ช่องใส่รหัสผ่านปลดล็อก PDF -->
+        <div class="password-box">
+          <label for="pdfPassword"><strong>🔑 รหัสผ่านเปิดไฟล์ PDF (ถ้ามี):</strong></label>
+          <input type="password" id="pdfPassword" placeholder="เช่น วันเกิด DDMMYYYY" />
+          <span style="font-size:0.78rem; color:#64748b;">(ปกติของ Dime คือ วันเดือนปีเกิด ค.ศ. 8 หลัก หรือเลขบัตร ปชช.)</span>
+        </div>
+
         <div class="dropzone" onclick="document.getElementById('dimePdf').click()">
-          <strong style="color:#047857; font-size:1rem;">📄 คลิกเพื่อเลือกไฟล์ PDF จากแอป Dime! (เลือกได้หลายเดือนพร้อมกัน)</strong>
-          <div style="font-size:0.82rem; color:#475569; margin-top:4px;">
-            วิธีเอาไฟล์จากแอป Dime!: เข้าแอป Dime! ➔ เมนูโปรไฟล์/ตั้งค่า ➔ เอกสาร (Documents / Statements) ➔ ดาวน์โหลด PDF
-          </div>
+          <strong style="color:#047857; font-size:1rem;">📄 คลิกเพื่อเลือกไฟล์ PDF จากแอป Dime! (รองรับการใส่รหัสผ่านด้านบน)</strong>
           <input type="file" id="dimePdf" accept="application/pdf" multiple style="display:none" onchange="parseDimePDF(event)">
         </div>
-        <div id="dimeLog" class="log-box">สถานะ: รอรับไฟล์ PDF จากแอป Dime!...</div>
+        <div id="dimeLog" class="log-box">สถานะ: กรอกรหัสผ่านด้านบน (ถ้ามี) แล้วคลิกอัปโหลดไฟล์ PDF ของ Dime!...</div>
 
         <div class="kpi-grid">
           <div class="kpi">
-            <div class="kpi-label">แลกเงินออกไปลงทุน (THB ➔ USD)</div>
+            <div class="kpi-label">แลกเงินออกไปลงทุน</div>
             <div class="kpi-val" id="k_fx_out">$0.00</div>
             <div class="kpi-sub" id="k_fx_out_thb">เงินต้นสะสม: 0.00 บาท</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">กำไรขายหุ้นสุทธิ (FIFO P&L)</div>
+            <div class="kpi-label">กำไรขายหุ้นสุทธิ (FIFO)</div>
             <div class="kpi-val" id="k_fifo_pnl">$0.00</div>
             <div class="kpi-sub" id="k_fifo_detail">กำไร $0.00 | ขาดทุน -$0.00</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">ปันผลหุ้นนอก + ดอกเบี้ย USD</div>
+            <div class="kpi-label">ปันผล + ดอกเบี้ย USD</div>
             <div class="kpi-val" id="k_div_int">$0.00</div>
-            <div class="kpi-sub" id="k_wht">ภาษีหัก ณ ที่จ่าย US (15%): $0.00</div>
+            <div class="kpi-sub" id="k_wht">ภาษี W-8BEN (15%): $0.00</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">แลกเงินกลับเข้าไทย (USD ➔ THB)</div>
+            <div class="kpi-label">แลกเงินกลับเข้าไทย</div>
             <div class="kpi-val" id="k_fx_in">$0.00</div>
-            <div class="kpi-sub" id="k_taxable_thb">กำไรส่วนที่ต้องเสียภาษี: 0.00 บาท</div>
+            <div class="kpi-sub" id="k_taxable_thb">กำไรส่วนต้องเสียภาษี: 0.00 บาท</div>
           </div>
         </div>
       </div>
 
-      <!-- ตารางแลกเงิน THB <-> USD ในแอป Dime! -->
+      <!-- ตาราง FX -->
       <div class="card">
-        <h3>
-          <span>2. ประวัติการแลกเงิน THB ↔ USD ในแอป Dime! (FX Conversion Ledger)</span>
-          <span style="font-size:0.75rem; color:#059669;">ใช้ตัดยอดเงินต้น (Principal) อัตโนมัติ</span>
-        </h3>
+        <h3>2. ประวัติการแลกเงิน THB ↔ USD ในแอป Dime!</h3>
         <table>
           <thead>
             <tr>
               <th>วันที่</th>
-              <th>รายการแลกเงินใน Dime!</th>
-              <th>ยอดดอลลาร์ (USD)</th>
-              <th>เรทแลกเปลี่ยน Dime!</th>
-              <th>ยอดเงินบาท (THB)</th>
-              <th>การวิเคราะห์ภาษีกรมสรรพากร</th>
+              <th>รายการ</th>
+              <th>USD</th>
+              <th>เรท</th>
+              <th>THB</th>
+              <th>สถานะภาษี</th>
             </tr>
           </thead>
           <tbody id="tb_fx"></tbody>
         </table>
       </div>
 
-      <!-- ตารางซื้อ-ขายหุ้นเศษส่วน (Fractional Shares FIFO) -->
+      <!-- ตาราง Trades -->
       <div class="card">
-        <h3>
-          <span>3. รายการซื้อ-ขายหุ้นสหรัฐฯ ใน Dime! (คำนวณต้นทุน FIFO ทศนิยมเศษหุ้นอัตโนมัติ)</span>
-          <span style="font-size:0.75rem; color:#0284c7;">จับคู่ล็อตซื้อ-ขายให้อัตโนมัติ</span>
-        </h3>
+        <h3>3. รายการซื้อ-ขายหุ้นสหรัฐฯ (FIFO Fractional Shares)</h3>
         <table>
           <thead>
             <tr>
               <th>วันที่</th>
-              <th>หุ้น (Ticker)</th>
+              <th>หุ้น</th>
               <th>สถานะ</th>
-              <th>จำนวนหุ้น (Fractional)</th>
-              <th>ราคาต่อหุ้น (USD)</th>
-              <th>มูลค่ารวม (USD)</th>
-              <th>กำไร/ขาดทุน FIFO (USD)</th>
+              <th>จำนวนหุ้น</th>
+              <th>ราคา/หุ้น</th>
+              <th>รวม (USD)</th>
+              <th>กำไร/ขาดทุน FIFO</th>
             </tr>
           </thead>
           <tbody id="tb_trades"></tbody>
         </table>
       </div>
 
-      <!-- ตารางปันผลและดอกเบี้ย USD (FCD) -->
+      <!-- ตาราง Div -->
       <div class="card">
-        <h3>4. เงินปันผลหุ้นสหรัฐฯ & ดอกเบี้ยเงินฝาก USD (Dime! FCD)</h3>
+        <h3>4. เงินปันผล & ดอกเบี้ย FCD (USD)</h3>
         <table>
           <thead>
             <tr>
               <th>วันที่</th>
-              <th>รายการ / ชื่อหุ้น</th>
-              <th>ยอดก่อนหักภาษี (Gross USD)</th>
-              <th>ภาษีหัก ณ ที่จ่าย (WHT USD)</th>
-              <th>ยอดรับสุทธิ (Net USD)</th>
+              <th>รายการ</th>
+              <th>Gross (USD)</th>
+              <th>WHT (USD)</th>
+              <th>Net (USD)</th>
             </tr>
           </thead>
           <tbody id="tb_divs"></tbody>
         </table>
       </div>
 
-      <!-- ข้อมูลเงินเดือนในไทย (50 ทวิ) -->
+      <!-- ข้อมูลไทย -->
       <div class="card">
-        <h3>5. เงินเดือนในไทย (40(1)) และค่าลดหย่อนรวม</h3>
+        <h3>5. เงินเดือนในไทย (40(1)) และค่าลดหย่อน</h3>
         <div class="input-line">
-          <label>เงินเดือนและโบนัสทั้งปี (มาตรา 40(1)) (บาท):</label>
+          <label>เงินเดือนและโบนัสทั้งปี (บาท):</label>
           <input type="number" id="in_salary" value="840000" oninput="calcDimeTax()">
         </div>
         <div class="input-line">
-          <label>ภาษีหัก ณ ที่จ่ายสะสมทั้งปีตามใบ 50 ทวิ (บาท):</label>
+          <label>ภาษีหัก ณ ที่จ่ายสะสม (บาท):</label>
           <input type="number" id="in_wht" value="35000" oninput="calcDimeTax()">
         </div>
         <div class="input-line">
-          <label>รวมค่าลดหย่อนส่วนตัว + ประกันสังคม + กองทุน + ประกัน (บาท):</label>
+          <label>รวมค่าลดหย่อน (บาท):</label>
           <input type="number" id="in_deduct" value="219000" oninput="calcDimeTax()">
         </div>
       </div>
     </div>
 
-    <!-- แผงสรุปภาษีฝั่งขวา -->
+    <!-- สสรุปฝั่งขวา -->
     <div class="summary-box">
       <h3 style="margin:0 0 12px; color:var(--dime-green);">สรุปภาษีพอร์ต Dime! + ภ.ง.ด. 90</h3>
-      <div class="s-row"><span>เงินได้ในไทย (เงินเดือน 40(1)):</span><span id="s_salary">0.00 บาท</span></div>
-      <div class="s-row"><span>กำไรขายหุ้น Dime! สุทธิ (FIFO):</span><span id="s_fifo_gain">$0.00</span></div>
-      <div class="s-row"><span>ปันผลหุ้นนอก + ดอกเบี้ย USD รวม:</span><span id="s_div_usd">$0.00</span></div>
-      <div class="s-row"><span>ยอดแลกเงิน USD กลับเป็น THB ปีนี้:</span><span id="s_in_usd">$0.00</span></div>
-      <div class="s-row" style="color:#86efac;"><span>• ตัดเป็น "เงินต้นโอนกลับ" (ปลอดภาษี):</span><span id="s_prin_usd">$0.00</span></div>
-      <div class="s-row" style="color:#fde047; font-weight:700;"><span>• ส่วนที่เป็น "กำไรแลกกลับเป็นบาท" (คิดภาษี):</span><span id="s_tax_fx_thb">0.00 บาท</span></div>
-      <div class="s-row"><span>รวมเงินได้พึงประเมินทั้งสิ้น:</span><span id="s_gross">0.00 บาท</span></div>
-      <div class="s-row"><span>หัก ค่าใช้จ่าย (50% ไม่เกิน 100,000):</span><span id="s_exp">0.00 บาท</span></div>
-      <div class="s-row"><span>หัก ค่าลดหย่อนรวม:</span><span id="s_ded">0.00 บาท</span></div>
-      <div class="s-row" style="color:#4ade80; font-weight:700;"><span>เงินได้สุทธิ (Net Taxable Income):</span><span id="s_net">0.00 บาท</span></div>
+      <div class="s-row"><span>เงินได้ในไทย:</span><span id="s_salary">0.00 บาท</span></div>
+      <div class="s-row"><span>กำไรขายหุ้นสุทธิ:</span><span id="s_fifo_gain">$0.00</span></div>
+      <div class="s-row"><span>ปันผล + ดอกเบี้ยรวม:</span><span id="s_div_usd">$0.00</span></div>
+      <div class="s-row"><span>ยอดแลกกลับไทยปีนี้:</span><span id="s_in_usd">$0.00</span></div>
+      <div class="s-row" style="color:#86efac;"><span>• หักเงินต้น (ปลอดภาษี):</span><span id="s_prin_usd">$0.00</span></div>
+      <div class="s-row" style="color:#fde047; font-weight:700;"><span>• ส่วนกำไร (คิดภาษี):</span><span id="s_tax_fx_thb">0.00 บาท</span></div>
+      <div class="s-row"><span>รวมเงินได้พึงประเมิน:</span><span id="s_gross">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ค่าใช้จ่าย:</span><span id="s_exp">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ค่าลดหย่อน:</span><span id="s_ded">0.00 บาท</span></div>
+      <div class="s-row" style="color:#4ade80; font-weight:700;"><span>เงินได้สุทธิ:</span><span id="s_net">0.00 บาท</span></div>
       <div class="s-row"><span>ภาษีตามขั้นบันได:</span><span id="s_tax_prog">0.00 บาท</span></div>
-      <div class="s-row" style="color:#38bdf8;"><span>หัก เครดิตภาษีปันผลสหรัฐฯ (W-8BEN 15%):</span><span id="s_ftc">0.00 บาท</span></div>
-      <div class="s-row"><span>หัก ภาษีหัก ณ ที่จ่ายในไทย (50 ทวิ):</span><span id="s_wht_th">0.00 บาท</span></div>
+      <div class="s-row" style="color:#38bdf8;"><span>หัก เครดิตภาษีปันผล US:</span><span id="s_ftc">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ภาษีหัก ณ ที่จ่ายไทย:</span><span id="s_wht_th">0.00 บาท</span></div>
       <div class="s-total" id="s_final">0.00 บาท</div>
       <div id="s_note" style="margin-top:12px; background:#1c2541; padding:12px; border-radius:8px; font-size:0.82rem; line-height:1.5;"></div>
     </div>
@@ -332,279 +343,166 @@
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  let dimeState = {
-    fxList: [],    // { date, dir: 'THB_TO_USD'|'USD_TO_THB', usd, rate }
-    rawTrades: [], // { date, ticker, side: 'BUY'|'SELL', shares, price, amountUsd }
-    divList: []    // { date, ticker, grossUsd, whtUsd }
-  };
-
+  let dimeState = { fxList: [], rawTrades: [], divList: [] };
   const fmt = (n, d = 2) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-  // ฟังก์ชันอ่านไฟล์ PDF ของ Dime! ด้วย Regex เฉพาะของ KKP Dime
   async function parseDimePDF(event) {
     const files = event.target.files;
     if (!files.length) return;
+    const password = document.getElementById('pdfPassword').value;
     const log = document.getElementById('dimeLog');
-    log.textContent = `กำลังอ่านไฟล์ PDF ของแอป Dime! จำนวน ${files.length} ไฟล์...\n`;
+    log.textContent = `กำลังถอดรหัสและอ่านไฟล์ PDF ของ Dime!...`;
     dimeState = { fxList: [], rawTrades: [], divList: [] };
 
     for (const file of files) {
-      const buf = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-      let text = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        text += content.items.map(it => it.str).join(' ') + '\n';
-      }
+      try {
+        const buf = await file.arrayBuffer();
+        // ส่งรหัสผ่านเข้าสู่ PDF.js เพื่อปลดล็อกไฟล์
+        const pdf = await pdfjsLib.getDocument({ data: buf, password: password }).promise;
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(it => it.str).join(' ') + '\n';
+        }
 
-      // Regex 1: ดึงรายการแลกเงิน THB <-> USD ในแอป Dime!
-      const fxOutRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:THB to USD|แลกเงินบาทเป็นดอลลาร์|Buy USD).*?([\d,]+\.\d{2})\s*USD.*?([\d]{2}\.\d{2,4})/gi;
-      let m;
-      while ((m = fxOutRe.exec(text)) !== null) {
-        dimeState.fxList.push({ date: m[1], dir: 'THB_TO_USD', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
+        // Regex สกัดข้อมูล
+        const fxOutRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:THB to USD|แลกเงินบาท|Buy USD).*?([\d,]+\.\d{2})\s*USD.*?([\d]{2}\.\d{2,4})/gi;
+        let m;
+        while ((m = fxOutRe.exec(text)) !== null) {
+          dimeState.fxList.push({ date: m[1], dir: 'THB_TO_USD', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
+        }
+        const fxInRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:USD to THB|แลกดอลลาร์|Sell USD).*?([\d,]+\.\d{2})\s*USD.*?([\d]{2}\.\d{2,4})/gi;
+        while ((m = fxInRe.exec(text)) !== null) {
+          dimeState.fxList.push({ date: m[1], dir: 'USD_TO_THB', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
+        }
+        const tradeRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})\s+(BUY|SELL)\s+([A-Z]{1,5})\s+(\d+\.\d{2,7})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})/gi;
+        while ((m = tradeRe.exec(text)) !== null) {
+          dimeState.rawTrades.push({ date: m[1], side: m[2].toUpperCase(), ticker: m[3].toUpperCase(), shares: parseFloat(m[4]), price: parseFloat(m[5].replace(/,/g, '')), amountUsd: parseFloat(m[6].replace(/,/g, '')) });
+        }
+        const divRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:Dividend|ปันผล)\s+([A-Z]{1,5}).*?\$?([\d,]+\.\d{2}).*?\$?([\d,]+\.\d{2})/gi;
+        while ((m = divRe.exec(text)) !== null) {
+          dimeState.divList.push({ date: m[1], ticker: m[2], grossUsd: parseFloat(m[3].replace(/,/g, '')), whtUsd: parseFloat(m[4].replace(/,/g, '')) });
+        }
+        log.textContent += `✔ ปลดล็อกและอ่านไฟล์ "${file.name}" สำเร็จ\n`;
+      } catch (err) {
+        log.textContent += `❌ ผิดพลาดกับไฟล์ "${file.name}": รหัสผ่านไม่ถูกต้องหรือไม่สามารถถอดรหัสได้\n`;
       }
-
-      const fxInRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:USD to THB|แลกดอลลาร์เป็นเงินบาท|Sell USD).*?([\d,]+\.\d{2})\s*USD.*?([\d]{2}\.\d{2,4})/gi;
-      while ((m = fxInRe.exec(text)) !== null) {
-        dimeState.fxList.push({ date: m[1], dir: 'USD_TO_THB', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
-      }
-
-      // Regex 2: ดึงรายการซื้อ-ขายหุ้นเศษส่วน (Fractional Shares 7 ตำแหน่งของ Dime!)
-      const tradeRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})\s+(BUY|SELL)\s+([A-Z]{1,5})\s+(\d+\.\d{2,7})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})/gi;
-      while ((m = tradeRe.exec(text)) !== null) {
-        dimeState.rawTrades.push({
-          date: m[1],
-          side: m[2].toUpperCase(),
-          ticker: m[3].toUpperCase(),
-          shares: parseFloat(m[4]),
-          price: parseFloat(m[5].replace(/,/g, '')),
-          amountUsd: parseFloat(m[6].replace(/,/g, ''))
-        });
-      }
-
-      // Regex 3: ดึงเงินปันผลและภาษีหัก ณ ที่จ่าย 15% ใน Dime!
-      const divRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:Dividend|ปันผล)\s+([A-Z]{1,5}).*?\$?([\d,]+\.\d{2}).*?\$?([\d,]+\.\d{2})/gi;
-      while ((m = divRe.exec(text)) !== null) {
-        dimeState.divList.push({
-          date: m[1],
-          ticker: m[2],
-          grossUsd: parseFloat(m[3].replace(/,/g, '')),
-          whtUsd: parseFloat(m[4].replace(/,/g, ''))
-        });
-      }
-      log.textContent += `✔ สกัดข้อมูลจาก "${file.name}" สำเร็จ\n`;
     }
     calcDimeTax();
   }
 
-  // จำลองข้อมูลจริงจากสเตทเมนต์แอป Dime! (มีทศนิยมเศษหุ้น DCA + แลกเงิน + ปันผล)
   function loadDimeSample() {
+    document.getElementById('pdfPassword').value = "15081996";
     dimeState = {
       fxList: [
         { date: '2026-01-10', dir: 'THB_TO_USD', usd: 3000.00, rate: 34.45 },
-        { date: '2026-03-05', dir: 'THB_TO_USD', usd: 2000.00, rate: 34.60 },
-        { date: '2026-09-20', dir: 'USD_TO_THB', usd: 4500.00, rate: 33.85 },
-        { date: '2026-10-12', dir: 'USD_TO_THB', usd: 1800.00, rate: 33.50 }
+        { date: '2026-09-20', dir: 'USD_TO_THB', usd: 4500.00, rate: 33.85 }
       ],
       rawTrades: [
         { date: '2026-01-12', side: 'BUY',  ticker: 'NVDA', shares: 15.5000000, price: 100.00, amountUsd: 1550.00 },
-        { date: '2026-03-10', side: 'BUY',  ticker: 'NVDA', shares: 10.2500000, price: 120.00, amountUsd: 1230.00 },
-        { date: '2026-08-15', side: 'SELL', ticker: 'NVDA', shares: 20.0000000, price: 145.00, amountUsd: 2900.00 },
-        { date: '2026-02-01', side: 'BUY',  ticker: 'TSLA', shares: 8.1250000,  price: 220.00, amountUsd: 1787.50 },
-        { date: '2026-07-20', side: 'SELL', ticker: 'TSLA', shares: 8.1250000,  price: 190.00, amountUsd: 1543.75 },
-        { date: '2026-04-01', side: 'BUY',  ticker: 'AAPL', shares: 12.0000000, price: 175.00, amountUsd: 2100.00 },
-        { date: '2026-09-18', side: 'SELL', ticker: 'AAPL', shares: 12.0000000, price: 225.00, amountUsd: 2700.00 }
+        { date: '2026-08-15', side: 'SELL', ticker: 'NVDA', shares: 15.5000000, price: 145.00, amountUsd: 2247.50 }
       ],
       divList: [
-        { date: '2026-05-16', ticker: 'AAPL (Dividend)', grossUsd: 48.00, whtUsd: 7.20 },
-        { date: '2026-06-28', ticker: 'NVDA (Dividend)', grossUsd: 22.00, whtUsd: 3.30 },
-        { date: '2026-08-30', ticker: 'Dime! FCD USD Interest', grossUsd: 85.00, whtUsd: 0.00 }
+        { date: '2026-05-16', ticker: 'AAPL (Dividend)', grossUsd: 48.00, whtUsd: 7.20 }
       ]
     };
-
-    document.getElementById('dimeLog').textContent =
-      `✔ [จำลองการสกัดด้วย Regex จากไฟล์ PDF ของแอป Dime! สำเร็จ]\n` +
-      `   • ดึงรายการแลกเงิน THB ➔ USD รวม $5,000.00 (เก็บเป็นวงเงินต้นปลอดภาษี)\n` +
-      `   • คำนวณต้นทุนเศษหุ้นแบบ FIFO (เช่น NVDA ซื้อ 2 รอบที่ $100 และ $120 แล้วขายออก 20 หุ้นที่ $145)\n` +
-      `   • ดึงรายการแลกเงิน USD ➔ THB กลับเข้าบัญชีไทยรวม $6,300.00 -> หักเงินต้นออก $5,000.00 เหลือส่วนที่เป็นกำไรนำเข้าไทย $1,300.00`;
-
+    document.getElementById('dimeLog').textContent = `✔ [จำลองสำเร็จด้วยรหัสผ่านจำลอง]: ระบบปลดล็อกไฟล์ PDF ของ Dime! และคำนวณเรียบร้อย`;
     calcDimeTax();
   }
 
   function calcDimeTax() {
-    // 1. คำนวณ FIFO สำหรับหุ้นแต่ละตัว
-    const inventory = {}; // ticker -> [{ shares, costPerShare }]
-    let totalRealizedGain = 0;
-    let totalRealizedLoss = 0;
-
-    const tradeRowsHtml = dimeState.rawTrades.map(t => {
+    let inventory = {}, totalRealizedGain = 0, totalRealizedLoss = 0;
+    const tradeRows = dimeState.rawTrades.map(t => {
       if (!inventory[t.ticker]) inventory[t.ticker] = [];
-      let pnlCell = `<span style="color:#64748b;">- (ตั้งต้นทุน FIFO)</span>`;
-
+      let pnlCell = `-`;
       if (t.side === 'BUY') {
         inventory[t.ticker].push({ shares: t.shares, costPerShare: t.amountUsd / t.shares });
-      } else if (t.side === 'SELL') {
-        let remToSell = t.shares;
-        let fifoCostBasis = 0;
-        const lots = inventory[t.ticker];
-        while (remToSell > 1e-7 && lots.length > 0) {
-          const lot = lots[0];
-          const take = Math.min(remToSell, lot.shares);
-          fifoCostBasis += take * lot.costPerShare;
-          lot.shares -= take;
-          remToSell -= take;
-          if (lot.shares <= 1e-7) lots.shift();
-        }
-        const pnl = t.amountUsd - fifoCostBasis;
-        if (pnl >= 0) {
-          totalRealizedGain += pnl;
-          pnlCell = `<span class="badge b-gain">+$${fmt(pnl)} (ทุน FIFO $${fmt(fifoCostBasis)})</span>`;
-        } else {
-          totalRealizedLoss += Math.abs(pnl);
-          pnlCell = `<span class="badge b-loss">-$${fmt(Math.abs(pnl))} (ทุน FIFO $${fmt(fifoCostBasis)})</span>`;
-        }
-      }
-
-      return `<tr>
-        <td>${t.date}</td>
-        <td><strong>${t.ticker}</strong></td>
-        <td style="text-align:center;"><span class="badge ${t.side === 'BUY' ? 'b-buy' : 'b-sell'}">${t.side}</span></td>
-        <td>${fmt(t.shares, 7)}</td>
-        <td>$${fmt(t.price)}</td>
-        <td>$${fmt(t.amountUsd)}</td>
-        <td style="text-align:right;">${pnlCell}</td>
-      </tr>`;
-    }).join('');
-    document.getElementById('tb_trades').innerHTML = tradeRowsHtml;
-
-    // 2. คำนวณตารางแลกเงิน THB <-> USD ในแอป Dime!
-    let outUsd = 0, outThb = 0, inUsd = 0, inThbWeighted = 0;
-    let runningPrin = 0;
-    const fxRowsHtml = dimeState.fxList.map(f => {
-      const thb = f.usd * f.rate;
-      let status = '';
-      if (f.dir === 'THB_TO_USD') {
-        outUsd += f.usd;
-        outThb += thb;
-        runningPrin += f.usd;
-        status = `<span class="badge b-buy">สะสมเงินต้นปลอดภาษี ($${fmt(runningPrin)})</span>`;
       } else {
-        inUsd += f.usd;
-        inThbWeighted += thb;
-        const prinUsed = Math.min(runningPrin, f.usd);
-        const profitPart = Math.max(0, f.usd - prinUsed);
-        runningPrin -= prinUsed;
-        status = profitPart > 0
-          ? `<span class="badge b-gain">คืนเงินต้น $${fmt(prinUsed)} + กำไรต้องเสียภาษี $${fmt(profitPart)}</span>`
-          : `<span class="badge b-buy">คืนเงินต้นทั้งจำนวน $${fmt(prinUsed)} (ไม่เสียภาษี)</span>`;
+        let rem = t.shares, cost = 0;
+        while (rem > 1e-7 && inventory[t.ticker].length > 0) {
+          let lot = inventory[t.ticker][0];
+          let take = Math.min(rem, lot.shares);
+          cost += take * lot.costPerShare;
+          lot.shares -= take;
+          rem -= take;
+          if (lot.shares <= 1e-7) inventory[t.ticker].shift();
+        }
+        let pnl = t.amountUsd - cost;
+        if (pnl >= 0) { totalRealizedGain += pnl; pnlCell = `<span class="badge b-gain">+$${fmt(pnl)}</span>`; }
+        else { totalRealizedLoss += Math.abs(pnl); pnlCell = `<span class="badge b-loss">-$${fmt(Math.abs(pnl))}</span>`; }
       }
-      return `<tr>
-        <td>${f.date}</td>
-        <td>${f.dir === 'THB_TO_USD' ? 'แลก THB ➔ USD (ฝากเข้าพอร์ต)' : 'แลก USD ➔ THB (ถอนกลับไทย)'}</td>
-        <td>$${fmt(f.usd)}</td>
-        <td>${fmt(f.rate)}</td>
-        <td>${fmt(thb)} บาท</td>
-        <td style="text-align:left;">${status}</td>
-      </tr>`;
+      return `<tr><td>${t.date}</td><td>${t.ticker}</td><td><span class="badge ${t.side==='BUY'?'b-buy':'b-sell'}">${t.side}</span></td><td>${fmt(t.shares,7)}</td><td>$${fmt(t.price)}</td><td>$${fmt(t.amountUsd)}</td><td>${pnlCell}</td></tr>`;
     }).join('');
-    document.getElementById('tb_fx').innerHTML = fxRowsHtml;
+    document.getElementById('tb_trades').innerHTML = tradeRows;
 
-    // 3. ตารางปันผลและดอกเบี้ย USD
-    let grossDivUsd = 0, whtUsd = 0;
-    const divRowsHtml = dimeState.divList.map(d => {
-      grossDivUsd += d.grossUsd;
-      whtUsd += d.whtUsd;
-      return `<tr>
-        <td>${d.date}</td>
-        <td><strong>${d.ticker}</strong></td>
-        <td>$${fmt(d.grossUsd)}</td>
-        <td style="color:#d97706;">-$${fmt(d.whtUsd)}</td>
-        <td style="font-weight:700;">$${fmt(d.grossUsd - d.whtUsd)}</td>
-      </tr>`;
+    let outUsd = 0, inUsd = 0, inThb = 0, prin = 0;
+    const fxRows = dimeState.fxList.map(f => {
+      let thb = f.usd * f.rate, stat = '';
+      if (f.dir === 'THB_TO_USD') { outUsd += f.usd; prin += f.usd; stat = 'สะสมเงินต้น'; }
+      else { inUsd += f.usd; inThb += thb; let pUsd = Math.min(prin, f.usd); prin -= pUsd; stat = `คืนเงินต้น $${fmt(pUsd)}`; }
+      return `<tr><td>${f.date}</td><td>${f.dir}</td><td>$${fmt(f.usd)}</td><td>${fmt(f.rate)}</td><td>${fmt(thb)}</td><td>${stat}</td></tr>`;
     }).join('');
-    document.getElementById('tb_divs').innerHTML = divRowsHtml;
+    document.getElementById('tb_fx').innerHTML = fxRows;
 
-    // 4. สรุปยอดกำไรสุทธิที่แลกกลับเป็นเงินบาทและคำนวณภาษี ภ.ง.ด. 90
-    const netFifoPnlUsd = Math.max(0, totalRealizedGain - totalRealizedLoss);
-    const totalPortProfitUsd = netFifoPnlUsd + grossDivUsd;
-    const avgInRate = inUsd > 0 ? (inThbWeighted / inUsd) : 33.80;
+    let grossDiv = 0, wht = 0;
+    const divRows = dimeState.divList.map(d => {
+      grossDiv += d.grossUsd; wht += d.whtUsd;
+      return `<tr><td>${d.date}</td><td>${d.ticker}</td><td>$${fmt(d.grossUsd)}</td><td>-$${fmt(d.whtUsd)}</td><td>$${fmt(d.grossUsd - d.whtUsd)}</td></tr>`;
+    }).join('');
+    document.getElementById('tb_divs').innerHTML = divRows;
 
-    const prinReturnedUsd = Math.min(outUsd, inUsd);
-    const excessInUsd = Math.max(0, inUsd - prinReturnedUsd);
-    const taxableUsd = Math.min(excessInUsd, totalPortProfitUsd);
-    const taxableThb = taxableUsd * avgInRate;
+    const netPnl = Math.max(0, totalRealizedGain - totalRealizedLoss);
+    const totalProf = netPnl + grossDiv;
+    const avgRate = inUsd > 0 ? (inThb / inUsd) : 33.80;
+    const taxableUsd = Math.min(Math.max(0, inUsd - Math.min(outUsd, inUsd)), totalProf);
+    const taxableThb = taxableUsd * avgRate;
 
-    const remitRatio = totalPortProfitUsd > 0 ? Math.min(1, taxableUsd / totalPortProfitUsd) : 0;
-    const ftcEligibleThb = (whtUsd * remitRatio) * avgInRate;
-
-    // อัปเดต KPI
     document.getElementById('k_fx_out').textContent = `$${fmt(outUsd)}`;
-    document.getElementById('k_fx_out_thb').textContent = `เงินต้นสะสม: ${fmt(outThb)} บาท`;
-    document.getElementById('k_fifo_pnl').textContent = `$${fmt(netFifoPnlUsd)}`;
-    document.getElementById('k_fifo_detail').textContent = `กำไร +$${fmt(totalRealizedGain)} | ขาดทุน -$${fmt(totalRealizedLoss)}`;
-    document.getElementById('k_div_int').textContent = `$${fmt(grossDivUsd)}`;
-    document.getElementById('k_wht').textContent = `หัก ณ ที่จ่าย US (15%): $${fmt(whtUsd)}`;
+    document.getElementById('k_fifo_pnl').textContent = `$${fmt(netPnl)}`;
+    document.getElementById('k_div_int').textContent = `$${fmt(grossDiv)}`;
+    document.getElementById('k_wht').textContent = `W-8BEN: $${fmt(wht)}`;
     document.getElementById('k_fx_in').textContent = `$${fmt(inUsd)}`;
-    document.getElementById('k_taxable_thb').textContent = `กำไรส่วนที่ต้องเสียภาษี: ${fmt(taxableThb)} บาท`;
+    document.getElementById('k_taxable_thb').textContent = `กำไรต้องเสียภาษี: ${fmt(taxableThb)} บาท`;
 
-    // คำนวณภาษี ภ.ง.ด. 90
     const salary = parseFloat(document.getElementById('in_salary').value) || 0;
     const whtTh = parseFloat(document.getElementById('in_wht').value) || 0;
     const deduct = parseFloat(document.getElementById('in_deduct').value) || 0;
-
     const grossThb = salary + taxableThb;
-    const expThb = Math.min(salary * 0.50, 100000);
-    const netThb = Math.max(0, grossThb - expThb - deduct);
+    const exp = Math.min(salary * 0.5, 100000);
+    const net = Math.max(0, grossThb - exp - deduct);
 
     const brackets = [
-      { min: 0, max: 150000, r: 0 },
-      { min: 150000, max: 300000, r: 0.05 },
-      { min: 300000, max: 500000, r: 0.10 },
-      { min: 500000, max: 750000, r: 0.15 },
-      { min: 750000, max: 1000000, r: 0.20 },
-      { min: 1000000, max: 2000000, r: 0.25 },
-      { min: 2000000, max: 5000000, r: 0.30 },
-      { min: 5000000, max: Infinity, r: 0.35 }
+      { max: 150000, r: 0 }, { max: 300000, r: 0.05 }, { max: 500000, r: 0.10 },
+      { max: 750000, r: 0.15 }, { max: 1000000, r: 0.20 }, { max: 2000000, r: 0.25 },
+      { max: 5000000, r: 0.30 }, { max: Infinity, r: 0.35 }
     ];
-    let progTax = 0;
-    for (const b of brackets) {
-      progTax += Math.max(0, Math.min(netThb, b.max) - b.min) * b.r;
+    let tax = 0, lastMax = 0;
+    for(let b of brackets) {
+      tax += Math.max(0, Math.min(net, b.max) - lastMax) * b.r;
+      lastMax = b.max;
     }
 
-    const avgTaxRate = grossThb > 0 ? (progTax / grossThb) : 0;
-    const ftcAllowed = Math.min(ftcEligibleThb, taxableThb * avgTaxRate);
-    const finalDiff = progTax - ftcAllowed - whtTh;
+    const ftc = Math.min((wht * (totalProf > 0 ? Math.min(1, taxableUsd / totalProf) : 0)) * avgRate, taxableThb * (grossThb > 0 ? tax / grossThb : 0));
+    const final = tax - ftc - whtTh;
 
     document.getElementById('s_salary').textContent = `${fmt(salary)} บาท`;
-    document.getElementById('s_fifo_gain').textContent = `$${fmt(netFifoPnlUsd)}`;
-    document.getElementById('s_div_usd').textContent = `$${fmt(grossDivUsd)}`;
+    document.getElementById('s_fifo_gain').textContent = `$${fmt(net)}`;
+    document.getElementById('s_div_usd').textContent = `$${fmt(grossDiv)}`;
     document.getElementById('s_in_usd').textContent = `$${fmt(inUsd)}`;
-    document.getElementById('s_prin_usd').textContent = `$${fmt(prinReturnedUsd)}`;
+    document.getElementById('s_prin_usd').textContent = `$${fmt(Math.min(outUsd, inUsd))}`;
     document.getElementById('s_tax_fx_thb').textContent = `${fmt(taxableThb)} บาท`;
     document.getElementById('s_gross').textContent = `${fmt(grossThb)} บาท`;
-    document.getElementById('s_exp').textContent = `${fmt(expThb)} บาท`;
+    document.getElementById('s_exp').textContent = `${fmt(exp)} บาท`;
     document.getElementById('s_ded').textContent = `${fmt(deduct)} บาท`;
-    document.getElementById('s_net').textContent = `${fmt(netThb)} บาท`;
-    document.getElementById('s_tax_prog').textContent = `${fmt(progTax)} บาท`;
-    document.getElementById('s_ftc').textContent = `${fmt(ftcAllowed)} บาท`;
+    document.getElementById('s_net').textContent = `${fmt(net)} บาท`;
+    document.getElementById('s_tax_prog').textContent = `${fmt(tax)} บาท`;
+    document.getElementById('s_ftc').textContent = `${fmt(ftc)} บาท`;
     document.getElementById('s_wht_th').textContent = `${fmt(whtTh)} บาท`;
-
-    const finalEl = document.getElementById('s_final');
-    if (finalDiff > 0) {
-      finalEl.textContent = `ชำระภาษีเพิ่มสุทธิ: ${fmt(finalDiff)} บาท`;
-      finalEl.style.color = '#f87171';
-    } else {
-      finalEl.textContent = `ได้รับเงินคืนภาษีสุทธิ: ${fmt(Math.abs(finalDiff))} บาท`;
-      finalEl.style.color = '#00d66c';
-    }
-
-    document.getElementById('s_note').innerHTML =
-      `<strong>ทริคสำคัญสำหรับคนใช้แอป Dime!:</strong><br>` +
-      `• หากคุณขายหุ้นใน Dime! ได้กำไรเป็นดอลลาร์ (USD) และพักไว้ในกระเป๋า <strong>Dime! FCD (บัญชีเงินฝากเงินตราต่างประเทศ)</strong> โดยยังไม่ได้กดแลกกลับมาเป็นเงินบาท (USD ➔ THB) ยอดกำไรจากการขายหุ้นในพอร์ตนั้นจะ <strong>ยังไม่ต้องนำมายื่นเสียภาษีในปีนั้น</strong> จนกว่าจะแลกกลับมาเป็นเงินบาทเข้าบัญชีไทยครับ`;
+    document.getElementById('s_final').textContent = `${fmt(Math.abs(final))} บาท (${final >= 0 ? 'ชำระเพิ่ม' : 'ได้เงินคืน'})`;
   }
 
-  loadDimeSample();
+  calcDimeSample();
 </script>
 </body>
 </html>
