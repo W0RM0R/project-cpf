@@ -3,19 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Expert Thai Tax & Financial Suite (มาตรฐานกรมสรรพากร 100%)</title>
+  <title>Dime! (KKP Dime) Automated PDF Tax Calculator - มาตรฐานกรมสรรพากร 100%</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     :root {
-      --primary: #0f172a;
-      --accent: #0284c7;
-      --accent-light: #e0f2fe;
-      --bg: #f1f5f9;
+      --dime-green: #00d66c;
+      --dime-dark: #0b132b;
+      --bg: #f4f7f9;
       --card: #ffffff;
-      --border: #cbd5e1;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
+      --border: #dce4ec;
     }
     * { box-sizing: border-box; }
     body {
@@ -26,468 +22,309 @@
       padding: 20px;
       font-size: 14px;
     }
-    .container { max-width: 1280px; margin: 0 auto; }
-    .header-bar {
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    .container { max-width: 1320px; margin: 0 auto; }
+    .header {
+      background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
       color: #fff;
       padding: 20px 24px;
-      border-radius: 12px;
+      border-radius: 14px;
       margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
+      border-left: 6px solid var(--dime-green);
     }
-    .header-bar h1 { margin: 0; font-size: 1.4rem; color: #38bdf8; }
-    .header-bar p { margin: 4px 0 0; font-size: 0.88rem; color: #cbd5e1; }
-    .tabs {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .tab-btn {
-      padding: 10px 16px;
-      border: 1px solid var(--border);
-      background: #fff;
+    .header h1 { margin: 0; font-size: 1.35rem; color: var(--dime-green); }
+    .header p { margin: 4px 0 0; font-size: 0.86rem; color: #cbd5e1; }
+    .btn {
+      padding: 9px 16px;
       border-radius: 8px;
-      cursor: pointer;
+      border: none;
       font-weight: 600;
-      color: #334155;
+      cursor: pointer;
       transition: 0.15s;
     }
-    .tab-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+    .btn-dime {
+      background: var(--dime-green);
+      color: #0b132b;
     }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .layout-grid {
+    .btn-dime:hover { opacity: 0.9; }
+    .grid-main {
       display: grid;
-      grid-template-columns: 1.35fr 1fr;
+      grid-template-columns: 1.55fr 1fr;
       gap: 20px;
       align-items: start;
     }
-    @media (max-width: 980px) {
-      .layout-grid { grid-template-columns: 1fr; }
+    @media (max-width: 1024px) {
+      .grid-main { grid-template-columns: 1fr; }
     }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 18px;
       margin-bottom: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
     .card h3 {
-      margin: 0 0 14px;
+      margin: 0 0 12px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #e2e8f0;
-      color: var(--primary);
-      font-size: 1.05rem;
-    }
-    .row {
+      border-bottom: 2px solid #f1f5f9;
+      color: var(--dime-dark);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+    }
+    .dropzone {
+      border: 2px dashed #00b85c;
+      background: #f0fdf4;
+      padding: 22px;
+      text-align: center;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .dropzone:hover { background: #dcfce7; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
+      margin-top: 14px;
     }
-    .row label { flex: 1; font-size: 0.9rem; }
-    .row input, .row select {
-      width: 170px;
-      padding: 7px 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+    @media (max-width: 768px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .kpi-label { font-size: 0.76rem; color: #64748b; }
+    .kpi-val { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-top: 3px; }
+    .kpi-sub { font-size: 0.73rem; color: #059669; margin-top: 2px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 7px 8px;
       text-align: right;
-      font-size: 0.92rem;
     }
+    th { background: #f1f5f9; color: #334155; text-align: center; }
+    td:first-child, td:nth-child(2) { text-align: left; }
     .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-size: 0.78rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.73rem;
       font-weight: 600;
     }
-    .badge-info { background: #e0f2fe; color: #0369a1; }
-    .badge-opt { background: #dcfce7; color: #15803d; }
-    .badge-warn { background: #fef3c7; color: #b45309; }
-    .summary-panel {
-      background: #0f172a;
+    .b-buy { background: #dbeafe; color: #1d4ed8; }
+    .b-sell { background: #fef3c7; color: #b45309; }
+    .b-gain { background: #dcfce7; color: #15803d; }
+    .b-loss { background: #fee2e2; color: #b91c1c; }
+    .summary-box {
+      background: var(--dime-dark);
       color: #f8fafc;
       border-radius: 12px;
       padding: 20px;
       position: sticky;
       top: 20px;
     }
-    .sum-line {
+    .s-row {
       display: flex;
       justify-content: space-between;
       padding: 7px 0;
       border-bottom: 1px solid #1e293b;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
-    .sum-total {
+    .s-total {
       font-size: 1.25rem;
-      font-weight: bold;
-      color: #38bdf8;
+      font-weight: 700;
+      color: var(--dime-green);
       padding-top: 10px;
     }
-    .advisor-box {
-      background: #1e293b;
-      border-left: 4px solid #38bdf8;
-      padding: 12px;
-      border-radius: 6px;
-      margin-top: 14px;
-      font-size: 0.85rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #334155;
-      padding: 6px 8px;
-      text-align: right;
-    }
-    th { background: #1e293b; color: #94a3b8; text-align: center; }
-    td:first-child { text-align: left; }
-    .upload-box {
-      border: 2px dashed var(--accent);
-      background: var(--accent-light);
-      padding: 16px;
-      text-align: center;
+    .log-box {
+      background: #0f172a;
+      color: #00d66c;
+      font-family: monospace;
+      font-size: 0.79rem;
+      padding: 10px;
       border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 12px;
+      margin-top: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .input-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .input-line input {
+      width: 150px;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-align: right;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="header-bar">
+  <div class="header">
     <div>
-      <h1>Expert Virtual Revenue Department & Financial Tax Suite</h1>
-      <p>ครอบคลุม ภ.ง.ด. 90/91/94 | หุ้นต่างประเทศ & DTA Credit | เครดิตปันผล 47 ทวิ | ใบแนบออกจากงาน | คริปโต | นำเข้า PDF 50 ทวิ</p>
+      <h1>Dime! (KKP Dime) Automated PDF Statement & Tax Engine</h1>
+      <p>สกัดข้อมูลจากไฟล์ PDF ของแอป Dime! อัตโนมัติ: คำนวณเศษหุ้น (Fractional Shares แบบ FIFO), แลกเงิน THB↔USD, ปันผล W-8BEN 15% และดอกเบี้ย FCD</p>
     </div>
     <div>
-      <button class="tab-btn" onclick="window.print()">พิมพ์รายงาน / บันทึกเป็น PDF</button>
+      <button class="btn btn-dime" onclick="loadDimeSample()">⚡ กดจำลองไฟล์ PDF สเตทเมนต์จากแอป Dime!</button>
     </div>
   </div>
 
-  <!-- ปุ่มสลับหมวดหมู่ -->
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-income', this)">1. รายได้ 40(1)-(8) & PDF</button>
-    <button class="tab-btn" onclick="switchTab('tab-foreign', this)">2. หุ้นต่างประเทศ & คริปโต</button>
-    <button class="tab-btn" onclick="switchTab('tab-dividend', this)">3. เครดิตปันผลหุ้นไทย (47 ทวิ)</button>
-    <button class="tab-btn" onclick="switchTab('tab-severance', this)">4. เงินก้อนออกจากงาน (ใบแนบ)</button>
-    <button class="tab-btn" onclick="switchTab('tab-deduct', this)">5. ค่าลดหย่อน & บริจาคครบทุกหมวด</button>
-    <button class="tab-btn" onclick="switchTab('tab-pnd94', this)">6. ภาษีครึ่งปี (ภ.ง.ด.94) & เบี้ยปรับ</button>
-  </div>
-
-  <div class="layout-grid">
-    <!-- ฝั่งซ้าย: โมดูลกรอกข้อมูล -->
+  <div class="grid-main">
     <div>
-      <!-- TAB 1: รายได้ในประเทศ & นำเข้า PDF -->
-      <div id="tab-income" class="tab-content active">
-        <div class="card">
-          <h3>นำเข้าไฟล์ PDF อัตโนมัติ (ใบ 50 ทวิ / สรุปลดหย่อน D-MyTax)</h3>
-          <div class="upload-box" onclick="document.getElementById('pdfFile').click()">
-            <strong>คลิกเพื่ออัปโหลดไฟล์ PDF (รองรับหลายไฟล์พร้อมกัน)</strong>
-            <div style="font-size:0.8rem; color:#475569;">ประมวลผลในเครื่อง 100% ไม่มีการอัปโหลดข้อมูลออกนอกเบราว์เซอร์</div>
-            <input type="file" id="pdfFile" accept="application/pdf" multiple style="display:none" onchange="parsePDF(event)">
+      <!-- กล่องอัปโหลดไฟล์ PDF ของ Dime! -->
+      <div class="card">
+        <h3>
+          <span>1. อัปโหลดไฟล์ PDF สเตทเมนต์จากแอป Dime! (Monthly Statement / Trade Confirm)</span>
+          <span style="font-size:0.76rem; color:#059669;">รองรับเศษหุ้นทศนิยม 7 ตำแหน่ง & FIFO อัตโนมัติ</span>
+        </h3>
+        <div class="dropzone" onclick="document.getElementById('dimePdf').click()">
+          <strong style="color:#047857; font-size:1rem;">📄 คลิกเพื่อเลือกไฟล์ PDF จากแอป Dime! (เลือกได้หลายเดือนพร้อมกัน)</strong>
+          <div style="font-size:0.82rem; color:#475569; margin-top:4px;">
+            วิธีเอาไฟล์จากแอป Dime!: เข้าแอป Dime! ➔ เมนูโปรไฟล์/ตั้งค่า ➔ เอกสาร (Documents / Statements) ➔ ดาวน์โหลด PDF
           </div>
-          <div id="pdfStatus" style="font-size:0.82rem; color:#0369a1; white-space:pre-line;">สถานะ: พร้อมรับไฟล์ PDF หรือกรอกข้อมูลด้านล่าง...</div>
+          <input type="file" id="dimePdf" accept="application/pdf" multiple style="display:none" onchange="parseDimePDF(event)">
         </div>
+        <div id="dimeLog" class="log-box">สถานะ: รอรับไฟล์ PDF จากแอป Dime!...</div>
 
-        <div class="card">
-          <h3>เงินได้พึงประเมินในประเทศ (มาตรา 40(1) - 40(8))</h3>
-          <div class="row">
-            <label>มาตรา 40(1) เงินเดือน ค่าจ้าง โบนัส (บาท/ปี):</label>
-            <input type="number" id="m40_1" value="840000" oninput="recalc()">
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-label">แลกเงินออกไปลงทุน (THB ➔ USD)</div>
+            <div class="kpi-val" id="k_fx_out">$0.00</div>
+            <div class="kpi-sub" id="k_fx_out_thb">เงินต้นสะสม: 0.00 บาท</div>
           </div>
-          <div class="row">
-            <label>มาตรา 40(2) ฟรีแลนซ์ ค่านายหน้า เบี้ยประชุม (บาท/ปี):</label>
-            <input type="number" id="m40_2" value="0" oninput="recalc()">
+          <div class="kpi">
+            <div class="kpi-label">กำไรขายหุ้นสุทธิ (FIFO P&L)</div>
+            <div class="kpi-val" id="k_fifo_pnl">$0.00</div>
+            <div class="kpi-sub" id="k_fifo_detail">กำไร $0.00 | ขาดทุน -$0.00</div>
           </div>
-          <div class="row">
-            <label>มาตรา 40(3) ค่าลิขสิทธิ์ กู๊ดวิลล์ (หักเหมา 50% ไม่เกิน 1 แสน):</label>
-            <input type="number" id="m40_3" value="0" oninput="recalc()">
+          <div class="kpi">
+            <div class="kpi-label">ปันผลหุ้นนอก + ดอกเบี้ย USD</div>
+            <div class="kpi-val" id="k_div_int">$0.00</div>
+            <div class="kpi-sub" id="k_wht">ภาษีหัก ณ ที่จ่าย US (15%): $0.00</div>
           </div>
-          <div class="row">
-            <label>มาตรา 40(5) ค่าเช่าทรัพย์สิน (บ้าน/อาคาร หักเหมา 30%):</label>
-            <input type="number" id="m40_5" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>มาตรา 40(6) วิชาชีพอิสระ (แพทย์ 60% / วิศวกร-บัญชี-ทนาย 30%):</label>
-            <input type="number" id="m40_6" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>อัตราหักค่าใช้จ่ายเหมาของ 40(6) (%):</label>
-            <select id="m40_6_rate" onchange="recalc()">
-              <option value="30">30% (วิศวกรรม / สถาปัตยกรรม / บัญชี / กฎหมาย)</option>
-              <option value="60">60% (การประกอบโรคศิลปะ / แพทย์)</option>
-            </select>
-          </div>
-          <div class="row">
-            <label>มาตรา 40(7)-(8) รับเหมาก่อสร้าง / ธุรกิจ / ค้าขายออนไลน์ (หักเหมา 60%):</label>
-            <input type="number" id="m40_8" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>ค่าใช้จ่ายตามจริง (กรณีเลือกหักตามจริงแทนหักเหมาสำหรับ 40(5)-(8)):</label>
-            <input type="number" id="m40_actual_exp" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>สิทธิ์ยกเว้นเงินได้ผู้สูงอายุ (65 ปี+) หรือผู้พิการ (190,000 บาท):</label>
-            <select id="elderly_right" onchange="recalc()">
-              <option value="0">ไม่ได้ใช้สิทธิ์ (0 บาท)</option>
-              <option value="190000">ใช้สิทธิ์ยกเว้น 190,000 บาทแรก</option>
-            </select>
-          </div>
-          <div class="row">
-            <label><strong>ภาษีหัก ณ ที่จ่ายสะสมทั้งปี (ตามใบ 50 ทวิ) (บาท):</strong></label>
-            <input type="number" id="wht_domestic" value="35000" oninput="recalc()">
+          <div class="kpi">
+            <div class="kpi-label">แลกเงินกลับเข้าไทย (USD ➔ THB)</div>
+            <div class="kpi-val" id="k_fx_in">$0.00</div>
+            <div class="kpi-sub" id="k_taxable_thb">กำไรส่วนที่ต้องเสียภาษี: 0.00 บาท</div>
           </div>
         </div>
       </div>
 
-      <!-- TAB 2: หุ้นต่างประเทศ & คริปโต -->
-      <div id="tab-foreign" class="tab-content">
-        <div class="card">
-          <h3>คำนวณภาษีหุ้นต่างประเทศ & เงินได้จากต่างประเทศ (มาตรา 41 วรรคสอง)</h3>
-          <div class="row">
-            <label>จำนวนวันที่พำนักในประเทศไทยในปีภาษีนี้ (วัน):</label>
-            <input type="number" id="days_in_th" value="365" max="366" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>ยอดโอนเงินจากพอร์ตต่างประเทศกลับเข้าไทยรวมทั้งปี (สกุลต่างประเทศ เช่น USD):</label>
-            <input type="number" id="fx_remit_total" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>หัก ส่วนที่เป็น "เงินต้นลงทุนเดิม" ที่โอนกลับ (ไม่เสียภาษี) (USD):</label>
-            <input type="number" id="fx_principal" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>กำไรจากการขายหุ้นต่างประเทศ (Realized Gain) ที่นำเข้าไทย (USD):</label>
-            <input type="number" id="fx_gain" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>ขาดทุนจากการขายหุ้นในปีเดียวกัน (Realized Loss ใช้หักกลบได้) (USD):</label>
-            <input type="number" id="fx_loss" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินปันผลหุ้นต่างประเทศที่นำเข้าไทย (Gross Dividend) (USD):</label>
-            <input type="number" id="fx_div" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>อัตราแลกเปลี่ยนถัวเฉลี่ยรับซื้อ ธปท. ณ วันที่โอนเงินเข้าไทย (บาท/USD):</label>
-            <input type="number" id="fx_rate" value="34.00" step="0.01" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>ภาษีที่ถูกหัก ณ ที่จ่ายในต่างประเทศแล้ว (เช่น US W-8BEN 15%) (USD):</label>
-            <input type="number" id="fx_foreign_tax_usd" value="0" oninput="recalc()">
-          </div>
-          <div id="fx_summary_note" style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:6px; font-size:0.85rem;"></div>
-        </div>
-
-        <div class="card">
-          <h3>คริปโตเคอร์เรนซี & สินทรัพย์ดิจิทัล (มาตรา 40(4)(ซ),(ฌ))</h3>
-          <div class="row">
-            <label>กำไรจากการเทรดบนกระดานที่ ก.ล.ต. ไทยรับรอง (ได้รับยกเว้นภาษี):</label>
-            <input type="number" id="crypto_sec_exempt" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>กำไรคริปโตนอกกระดาน ก.ล.ต. / เหรียญรางวัล / Staking / Yield (บาท):</label>
-            <input type="number" id="crypto_taxable" value="0" oninput="recalc()">
-          </div>
-        </div>
+      <!-- ตารางแลกเงิน THB <-> USD ในแอป Dime! -->
+      <div class="card">
+        <h3>
+          <span>2. ประวัติการแลกเงิน THB ↔ USD ในแอป Dime! (FX Conversion Ledger)</span>
+          <span style="font-size:0.75rem; color:#059669;">ใช้ตัดยอดเงินต้น (Principal) อัตโนมัติ</span>
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>รายการแลกเงินใน Dime!</th>
+              <th>ยอดดอลลาร์ (USD)</th>
+              <th>เรทแลกเปลี่ยน Dime!</th>
+              <th>ยอดเงินบาท (THB)</th>
+              <th>การวิเคราะห์ภาษีกรมสรรพากร</th>
+            </tr>
+          </thead>
+          <tbody id="tb_fx"></tbody>
+        </table>
       </div>
 
-      <!-- TAB 3: เครดิตภาษีเงินปันผลหุ้นไทย 47 ทวิ -->
-      <div id="tab-dividend" class="tab-content">
-        <div class="card">
-          <h3>เครดิตภาษีเงินปันผลหุ้นไทย (มาตรา 47 ทวิ) vs Final Tax 10%</h3>
-          <p style="font-size:0.84rem; color:#475569; margin-top:0;">
-            ระบบจะจำลองเปรียบเทียบให้อัตโนมัติว่าควร "นำเงินปันผลมารวมคำนวณเพื่อรับเครดิตภาษีคืน" หรือ "เลือกแยกยื่น Final Tax 10%" แบบไหนประหยัดภาษีกว่ากัน
-          </p>
-          <div class="row">
-            <label>เงินปันผลจากบริษัทที่เสียภาษีนิติบุคคล <strong>20%</strong> (เครดิต 20/80 = 25%):</label>
-            <input type="number" id="div_20" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินปันผลจากบริษัทที่เสียภาษีนิติบุคคล <strong>15%</strong> (เครดิต 15/85):</label>
-            <input type="number" id="div_15" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินปันผลจากบริษัทที่เสียภาษีนิติบุคคล <strong>10%</strong> (เครดิต 10/90):</label>
-            <input type="number" id="div_10" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินปันผล BOI / กองทุนรวม (ไม่ได้รับเครดิตภาษี หัก ณ ที่จ่าย 10%):</label>
-            <input type="number" id="div_0" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>โหมดการยื่นเงินปันผล:</label>
-            <select id="div_mode" onchange="recalc()">
-              <option value="auto">ให้ระบบเลือกวิธีที่ประหยัดภาษีที่สุดอัตโนมัติ (Auto-Optimize)</option>
-              <option value="include">บังคับนำมารวมคำนวณ (ใช้สิทธิ์เครดิต 47 ทวิ)</option>
-              <option value="exclude">บังคับแยกยื่น Final Tax 10% (ไม่นำมารวม)</option>
-            </select>
-          </div>
-          <div id="div_advice" style="margin-top:10px; padding:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; font-size:0.85rem;"></div>
-        </div>
+      <!-- ตารางซื้อ-ขายหุ้นเศษส่วน (Fractional Shares FIFO) -->
+      <div class="card">
+        <h3>
+          <span>3. รายการซื้อ-ขายหุ้นสหรัฐฯ ใน Dime! (คำนวณต้นทุน FIFO ทศนิยมเศษหุ้นอัตโนมัติ)</span>
+          <span style="font-size:0.75rem; color:#0284c7;">จับคู่ล็อตซื้อ-ขายให้อัตโนมัติ</span>
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>หุ้น (Ticker)</th>
+              <th>สถานะ</th>
+              <th>จำนวนหุ้น (Fractional)</th>
+              <th>ราคาต่อหุ้น (USD)</th>
+              <th>มูลค่ารวม (USD)</th>
+              <th>กำไร/ขาดทุน FIFO (USD)</th>
+            </tr>
+          </thead>
+          <tbody id="tb_trades"></tbody>
+        </table>
       </div>
 
-      <!-- TAB 4: เงินก้อนออกจากงาน (ใบแนบ) -->
-      <div id="tab-severance" class="tab-content">
-        <div class="card">
-          <h3>เงินได้ครั้งเดียวเพราะเหตุออกจากงาน / เกษียณ (มาตรา 48(5) ใบแนบ ภ.ง.ด. 90/91)</h3>
-          <div class="row">
-            <label>อายุงานรวม (ปี) (ตั้งแต่ 5 ปีขึ้นไปมีสิทธิ์เลือกแยกคำนวณใบแนบ):</label>
-            <input type="number" id="sev_years" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินชดเชยตามกฎหมายแรงงาน (ยกเว้นภาษีส่วนที่ไม่เกิน 600,000 บาท):</label>
-            <input type="number" id="sev_compensation" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินกองทุนสำรองเลี้ยงชีพ (PVD) / กบข. ส่วนที่ต้องเสียภาษีเมื่อลาออก (บาท):</label>
-            <input type="number" id="sev_pvd_payout" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>ภาษีหัก ณ ที่จ่ายของเงินก้อนออกจากงาน (บาท):</label>
-            <input type="number" id="sev_wht" value="0" oninput="recalc()">
-          </div>
-          <div id="sev_summary" style="margin-top:10px; padding:10px; background:#f8fafc; border-radius:6px; font-size:0.85rem;"></div>
-        </div>
+      <!-- ตารางปันผลและดอกเบี้ย USD (FCD) -->
+      <div class="card">
+        <h3>4. เงินปันผลหุ้นสหรัฐฯ & ดอกเบี้ยเงินฝาก USD (Dime! FCD)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>รายการ / ชื่อหุ้น</th>
+              <th>ยอดก่อนหักภาษี (Gross USD)</th>
+              <th>ภาษีหัก ณ ที่จ่าย (WHT USD)</th>
+              <th>ยอดรับสุทธิ (Net USD)</th>
+            </tr>
+          </thead>
+          <tbody id="tb_divs"></tbody>
+        </table>
       </div>
 
-      <!-- TAB 5: ค่าลดหย่อนครบทุกหมวด -->
-      <div id="tab-deduct" class="tab-content">
-        <div class="card">
-          <h3>หมวดลดหย่อนส่วนตัว ครอบครัว ประกัน และการลงทุน (ตรวจสอบเพดานอัตโนมัติ)</h3>
-          <div class="row">
-            <label>ลดหย่อนส่วนตัว (60,000 บาท):</label>
-            <input type="number" value="60000" readonly style="background:#e2e8f0;">
-          </div>
-          <div class="row">
-            <label>คู่สมรสไม่มีเงินได้ (สูงสุด 60,000 บาท):</label>
-            <input type="number" id="d_spouse" value="0" max="60000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>บุตร + ค่าฝากครรภ์ + อุปการะบิดามารดา + ผู้พิการ (บาท):</label>
-            <input type="number" id="d_family" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เงินสมทบกองทุนประกันสังคม (สูงสุด 9,000 บาท):</label>
-            <input type="number" id="d_sso" value="9000" max="9000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เบี้ยประกันชีวิตทั่วไป + ประกันสะสมทรัพย์ (สูงสุด 100,000):</label>
-            <input type="number" id="d_life" value="35000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เบี้ยประกันสุขภาพตนเอง (สูงสุด 25,000 และรวมประกันชีวิตไม่เกิน 100,000):</label>
-            <input type="number" id="d_health" value="15000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เบี้ยประกันสุขภาพบิดามารดา (สูงสุด 15,000):</label>
-            <input type="number" id="d_parent_health" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>กองทุน Thai ESG (สูงสุด 30% ของเงินได้ ไม่เกิน 300,000 แยกวงเงิน):</label>
-            <input type="number" id="d_thaiesg" value="50000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>กองทุนสำรองเลี้ยงชีพ (PVD) / กบข. (ไม่เกิน 15% ของเงินได้):</label>
-            <input type="number" id="d_pvd" value="50000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>กองทุน RMF (ไม่เกิน 30% ของเงินได้):</label>
-            <input type="number" id="d_rmf" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>เบี้ยประกันชีวิตแบบบำนาญ (ไม่เกิน 15% ของเงินได้ สูงสุด 200,000):</label>
-            <input type="number" id="d_pension_ins" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>ดอกเบี้ยกู้ยืมเพื่อที่อยู่อาศัย (สูงสุด 100,000):</label>
-            <input type="number" id="d_home_int" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>Easy E-Receipt / มาตรการกระตุ้นเศรษฐกิจภาครัฐ (สูงสุด 50,000):</label>
-            <input type="number" id="d_easy_receipt" value="30000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>บริจาคพรรคการเมือง (สูงสุด 10,000):</label>
-            <input type="number" id="d_politic" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label><strong>ยอดจ่ายจริง</strong> เงินบริจาคพิเศษ 2 เท่า (การศึกษา/กีฬา/รพ.รัฐ):</label>
-            <input type="number" id="d_don2x" value="5000" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label><strong>ยอดจ่ายจริง</strong> เงินบริจาคทั่วไป 1 เท่า:</label>
-            <input type="number" id="d_don1x" value="0" oninput="recalc()">
-          </div>
+      <!-- ข้อมูลเงินเดือนในไทย (50 ทวิ) -->
+      <div class="card">
+        <h3>5. เงินเดือนในไทย (40(1)) และค่าลดหย่อนรวม</h3>
+        <div class="input-line">
+          <label>เงินเดือนและโบนัสทั้งปี (มาตรา 40(1)) (บาท):</label>
+          <input type="number" id="in_salary" value="840000" oninput="calcDimeTax()">
         </div>
-      </div>
-
-      <!-- TAB 6: ภ.ง.ด. 94 & เงินเพิ่ม -->
-      <div id="tab-pnd94" class="tab-content">
-        <div class="card">
-          <h3>ภาษีครึ่งปี (ภ.ง.ด. 94) และคำนวณเงินเพิ่มกรณียื่นล่าช้า (มาตรา 27)</h3>
-          <div class="row">
-            <label>ภาษีครึ่งปี (ภ.ง.ด. 94) ที่ชำระไว้แล้วเมื่อเดือน ก.ย.-ต.ค. (นำมาหักเป็นเครดิตได้):</label>
-            <input type="number" id="pnd94_paid" value="0" oninput="recalc()">
-          </div>
-          <div class="row">
-            <label>จำนวนเดือนที่ยื่นภาษีล่าช้าเกินกำหนด (คิดเงินเพิ่ม 1.5% ต่อเดือน):</label>
-            <input type="number" id="late_months" value="0" min="0" oninput="recalc()">
-          </div>
+        <div class="input-line">
+          <label>ภาษีหัก ณ ที่จ่ายสะสมทั้งปีตามใบ 50 ทวิ (บาท):</label>
+          <input type="number" id="in_wht" value="35000" oninput="calcDimeTax()">
+        </div>
+        <div class="input-line">
+          <label>รวมค่าลดหย่อนส่วนตัว + ประกันสังคม + กองทุน + ประกัน (บาท):</label>
+          <input type="number" id="in_deduct" value="219000" oninput="calcDimeTax()">
         </div>
       </div>
     </div>
 
-    <!-- ฝั่งขวา: แผงสรุปผลแบบเรียลไทม์ + AI Tax Advisor -->
-    <div class="summary-panel">
-      <h3 style="margin:0 0 12px; color:#38bdf8;">รายงานสรุปการคำนวณภาษีครบวงจร (ภ.ง.ด. 90/91)</h3>
-      <div class="sum-line"><span>1. เงินได้ในประเทศรวม (40(1)-(8)):</span><span id="out_dom_inc">0.00</span></div>
-      <div class="sum-line"><span>2. เงินได้หุ้น/ปันผลต่างประเทศที่นำเข้าไทย:</span><span id="out_fx_inc">0.00</span></div>
-      <div class="sum-line"><span>3. เงินปันผลไทย + เครดิตปันผล (47 ทวิ):</span><span id="out_div_inc">0.00</span></div>
-      <div class="sum-line"><span>4. กำไรคริปโตที่ต้องเสียภาษี:</span><span id="out_crypto_inc">0.00</span></div>
-      <div class="sum-line" style="color:#fde047; font-weight:600;"><span>รวมเงินได้พึงประเมิน (หลังหักยกเว้นผู้สูงอายุ):</span><span id="out_gross">0.00</span></div>
-      <div class="sum-line"><span>หัก ค่าใช้จ่ายรวมตามกฎหมาย:</span><span id="out_exp">0.00</span></div>
-      <div class="sum-line"><span>หัก ค่าลดหย่อนรวม (ก่อนบริจาค):</span><span id="out_ded">0.00</span></div>
-      <div class="sum-line"><span>หัก เงินบริจาค (2 เท่า + 1 เท่า ตามเพดาน 10%):</span><span id="out_don">0.00</span></div>
-      <div class="sum-line" style="color:#4ade80; font-weight:bold;"><span>เงินได้สุทธิ (Net Taxable Income):</span><span id="out_net">0.00</span></div>
-      <div class="sum-line"><span>ภาษีคำนวณวิธีที่ 1 (ขั้นบันได) vs วิธีที่ 2 (0.5%):</span><span id="out_base_tax">0.00</span></div>
-      <div class="sum-line"><span>บวก ภาษีแยกคำนวณเงินก้อนออกจากงาน (ใบแนบ):</span><span id="out_sev_tax">0.00</span></div>
-      <div class="sum-line"><span>หัก เครดิตภาษีต่างประเทศ (DTA Foreign Tax Credit):</span><span id="out_ftc">0.00</span></div>
-      <div class="sum-line"><span>หัก เครดิตภาษีปันผล 47 ทวิ + หัก ณ ที่จ่ายปันผล:</span><span id="out_div_credit">0.00</span></div>
-      <div class="sum-line"><span>หัก ภาษีหัก ณ ที่จ่ายสะสม + ภ.ง.ด.94:</span><span id="out_wht_total">0.00</span></div>
-      <div class="sum-line"><span>บวก เงินเพิ่มกรณียื่นล่าช้า (1.5%/เดือน):</span><span id="out_surcharge">0.00</span></div>
-      <div class="sum-total" id="out_final_status">0.00 บาท</div>
-      <div style="font-size:0.8rem; color:#94a3b8; margin-top:4px;" id="out_effective_rate"></div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>ขั้นเงินได้สุทธิ</th>
-            <th>อัตรา</th>
-            <th>เงินได้ในขั้น</th>
-            <th>ภาษี (บาท)</th>
-          </tr>
-        </thead>
-        <tbody id="out_brackets"></tbody>
-      </table>
-
-      <div class="advisor-box" id="out_advisor"></div>
+    <!-- แผงสรุปภาษีฝั่งขวา -->
+    <div class="summary-box">
+      <h3 style="margin:0 0 12px; color:var(--dime-green);">สรุปภาษีพอร์ต Dime! + ภ.ง.ด. 90</h3>
+      <div class="s-row"><span>เงินได้ในไทย (เงินเดือน 40(1)):</span><span id="s_salary">0.00 บาท</span></div>
+      <div class="s-row"><span>กำไรขายหุ้น Dime! สุทธิ (FIFO):</span><span id="s_fifo_gain">$0.00</span></div>
+      <div class="s-row"><span>ปันผลหุ้นนอก + ดอกเบี้ย USD รวม:</span><span id="s_div_usd">$0.00</span></div>
+      <div class="s-row"><span>ยอดแลกเงิน USD กลับเป็น THB ปีนี้:</span><span id="s_in_usd">$0.00</span></div>
+      <div class="s-row" style="color:#86efac;"><span>• ตัดเป็น "เงินต้นโอนกลับ" (ปลอดภาษี):</span><span id="s_prin_usd">$0.00</span></div>
+      <div class="s-row" style="color:#fde047; font-weight:700;"><span>• ส่วนที่เป็น "กำไรแลกกลับเป็นบาท" (คิดภาษี):</span><span id="s_tax_fx_thb">0.00 บาท</span></div>
+      <div class="s-row"><span>รวมเงินได้พึงประเมินทั้งสิ้น:</span><span id="s_gross">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ค่าใช้จ่าย (50% ไม่เกิน 100,000):</span><span id="s_exp">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ค่าลดหย่อนรวม:</span><span id="s_ded">0.00 บาท</span></div>
+      <div class="s-row" style="color:#4ade80; font-weight:700;"><span>เงินได้สุทธิ (Net Taxable Income):</span><span id="s_net">0.00 บาท</span></div>
+      <div class="s-row"><span>ภาษีตามขั้นบันได:</span><span id="s_tax_prog">0.00 บาท</span></div>
+      <div class="s-row" style="color:#38bdf8;"><span>หัก เครดิตภาษีปันผลสหรัฐฯ (W-8BEN 15%):</span><span id="s_ftc">0.00 บาท</span></div>
+      <div class="s-row"><span>หัก ภาษีหัก ณ ที่จ่ายในไทย (50 ทวิ):</span><span id="s_wht_th">0.00 บาท</span></div>
+      <div class="s-total" id="s_final">0.00 บาท</div>
+      <div id="s_note" style="margin-top:12px; background:#1c2541; padding:12px; border-radius:8px; font-size:0.82rem; line-height:1.5;"></div>
     </div>
   </div>
 </div>
@@ -495,242 +332,21 @@
 <script>
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  function switchTab(tabId, btn) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tabs .tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    btn.classList.add('active');
-  }
+  let dimeState = {
+    fxList: [],    // { date, dir: 'THB_TO_USD'|'USD_TO_THB', usd, rate }
+    rawTrades: [], // { date, ticker, side: 'BUY'|'SELL', shares, price, amountUsd }
+    divList: []    // { date, ticker, grossUsd, whtUsd }
+  };
 
-  const fmt = (n) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const val = (id) => parseFloat(document.getElementById(id).value) || 0;
+  const fmt = (n, d = 2) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-  function calcProgressiveTax(netIncome, allowZeroBracket = true) {
-    const brackets = [
-      { min: 0, max: 150000, rate: allowZeroBracket ? 0.00 : 0.05, label: '0 - 150,000' },
-      { min: 150000, max: 300000, rate: 0.05, label: '150,001 - 300,000' },
-      { min: 300000, max: 500000, rate: 0.10, label: '300,001 - 500,000' },
-      { min: 500000, max: 750000, rate: 0.15, label: '500,001 - 750,000' },
-      { min: 750000, max: 1000000, rate: 0.20, label: '750,001 - 1,000,000' },
-      { min: 1000000, max: 2000000, rate: 0.25, label: '1,000,001 - 2,000,000' },
-      { min: 2000000, max: 5000000, rate: 0.30, label: '2,000,001 - 5,000,000' },
-      { min: 5000000, max: Infinity, rate: 0.35, label: '5,000,001 ขึ้นไป' }
-    ];
-    let total = 0;
-    let rows = '';
-    let marginalRate = 0;
-    for (const b of brackets) {
-      const amt = Math.max(0, Math.min(netIncome, b.max) - b.min);
-      const t = amt * b.rate;
-      if (amt > 0) marginalRate = b.rate;
-      total += t;
-      rows += `<tr><td>${b.label}</td><td style="text-align:center;">${(b.rate*100).toFixed(0)}%</td><td>${fmt(amt)}</td><td>${fmt(t)}</td></tr>`;
-    }
-    return { total, rows, marginalRate };
-  }
-
-  function recalc() {
-    // 1. เงินได้ในประเทศ
-    const m1 = val('m40_1'), m2 = val('m40_2'), m3 = val('m40_3');
-    const m5 = val('m40_5'), m6 = val('m40_6'), m6Rate = val('m40_6_rate'), m8 = val('m40_8');
-    const actualExp = val('m40_actual_exp');
-    const elderlyExempt = val('elderly_right');
-    const domesticIncome = m1 + m2 + m3 + m5 + m6 + m8;
-
-    // 2. หุ้นต่างประเทศและเงินได้ต่างประเทศ (มาตรา 41 วรรคสอง)
-    const daysInTh = val('days_in_th');
-    const fxRate = val('fx_rate');
-    const fxGainUsd = val('fx_gain'), fxLossUsd = val('fx_loss'), fxDivUsd = val('fx_div');
-    const fxForeignTaxUsd = val('fx_foreign_tax_usd');
-    const netFxCapitalGainUsd = Math.max(0, fxGainUsd - fxLossUsd);
-    const totalTaxableFxUsd = netFxCapitalGainUsd + fxDivUsd;
-
-    let taxableFxThb = 0;
-    let foreignTaxPaidThb = 0;
-    if (daysInTh >= 180) {
-      taxableFxThb = totalTaxableFxUsd * fxRate;
-      foreignTaxPaidThb = fxForeignTaxUsd * fxRate;
-      document.getElementById('fx_summary_note').innerHTML =
-        `สถานะ: พำนักในไทย <strong>${daysInTh} วัน (≥ 180 วัน)</strong> กำไรสุทธิหลังหักขาดทุน (${fmt(netFxCapitalGainUsd)} USD) + ปันผล (${fmt(fxDivUsd)} USD) คิดเป็นเงินได้พึงประเมิน <strong>${fmt(taxableFxThb)} บาท</strong> (ไม่รวมเงินต้นที่โอนกลับ)`;
-    } else {
-      document.getElementById('fx_summary_note').innerHTML =
-        `สถานะ: พำนักในไทย <strong>${daysInTh} วัน (< 180 วัน)</strong> ไม่ถือเป็นผู้มีถิ่นที่อยู่ในไทยในปีภาษีนี้ ได้รับยกเว้นภาษีเงินได้จากต่างประเทศที่โอนเข้ามา`;
-    }
-
-    // 3. คริปโต
-    const cryptoTaxable = val('crypto_taxable');
-
-    // 4. เครดิตภาษีเงินปันผลหุ้นไทย (มาตรา 47 ทวิ)
-    const d20 = val('div_20'), d15 = val('div_15'), d10 = val('div_10'), d0 = val('div_0');
-    const c20 = d20 * (20 / 80);
-    const c15 = d15 * (15 / 85);
-    const c10 = d10 * (10 / 90);
-    const totalDivRaw = d20 + d15 + d10 + d0;
-    const totalDivCredit = c20 + c15 + c10;
-    const totalDivWht10 = totalDivRaw * 0.10;
-    const divGrossUp = totalDivRaw + totalDivCredit;
-
-    // 5. ค่าใช้จ่ายตามกฎหมาย
-    const exp1_2 = Math.min((m1 + m2) * 0.50, 100000);
-    const exp3 = Math.min(m3 * 0.50, 100000);
-    const standardExp5_8 = (m5 * 0.30) + (m6 * (m6Rate / 100)) + (m8 * 0.60);
-    const exp5_8 = actualExp > 0 ? actualExp : standardExp5_8;
-    const totalExpense = exp1_2 + exp3 + exp5_8;
-
-    // ฟังก์ชันจำลองคำนวณภาษีกรณีรวมปันผล vs ไม่รวมปันผล
-    function runTaxScenario(includeDividend) {
-      const divInc = includeDividend ? divGrossUp : 0;
-      const divCredAndWht = includeDividend ? (totalDivCredit + totalDivWht10) : 0;
-      const gross = Math.max(0, domesticIncome + taxableFxThb + cryptoTaxable + divInc - elderlyExempt);
-
-      // ตรวจสอบเพดานลดหย่อน
-      const dedPersonal = 60000;
-      const dedSpouse = Math.min(val('d_spouse'), 60000);
-      const dedFamily = val('d_family');
-      const dedSso = Math.min(val('d_sso'), 9000);
-      const ownIns = Math.min(Math.min(val('d_life'), 100000) + Math.min(val('d_health'), 25000), 100000);
-      const parentIns = Math.min(val('d_parent_health'), 15000);
-      const thaiEsg = Math.min(val('d_thaiesg'), gross * 0.30, 300000);
-
-      const pvd = Math.min(val('d_pvd'), gross * 0.15, 500000);
-      const rmf = Math.min(val('d_rmf'), gross * 0.30, 500000);
-      const pension = Math.min(val('d_pension_ins'), gross * 0.15, 200000);
-      const retireGroup = Math.min(pvd + rmf + pension, 500000);
-
-      const homeInt = Math.min(val('d_home_int'), 100000);
-      const stimulus = Math.min(val('d_easy_receipt'), 50000);
-      const politic = Math.min(val('d_politic'), 100000);
-
-      const totalAllowancePreDon = dedPersonal + dedSpouse + dedFamily + dedSso + ownIns + parentIns + thaiEsg + retireGroup + homeInt + stimulus + politic;
-      const incBeforeDon = Math.max(0, gross - totalExpense - totalAllowancePreDon);
-
-      const don2x = Math.min(val('d_don2x') * 2, incBeforeDon * 0.10);
-      const incAfter2x = Math.max(0, incBeforeDon - don2x);
-      const don1x = Math.min(val('d_don1x'), incAfter2x * 0.10);
-      const totalDon = don2x + don1x;
-
-      const netIncome = Math.max(0, incAfter2x - don1x);
-      const prog = calcProgressiveTax(netIncome, true);
-
-      // วิธีที่ 2 (0.5%)
-      const nonSalary = m2 + m3 + m5 + m6 + m8 + taxableFxThb + cryptoTaxable + divInc;
-      let taxM2 = 0;
-      if (nonSalary >= 120000) {
-        const rawM2 = nonSalary * 0.005;
-        taxM2 = rawM2 > 5000 ? rawM2 : 0;
-      }
-      const baseTax = Math.max(prog.total, taxM2);
-
-      // เครดิตภาษีต่างประเทศ (ไม่เกินอัตราภาษีเฉลี่ยของเงินได้ต่างประเทศในไทย)
-      const avgTaxRate = gross > 0 ? (baseTax / gross) : 0;
-      const maxFtcLimit = taxableFxThb * avgTaxRate;
-      const allowedFtc = Math.min(foreignTaxPaidThb, maxFtcLimit);
-
-      const netTaxAfterCredits = baseTax - allowedFtc - divCredAndWht;
-      return {
-        gross, totalAllowancePreDon, totalDon, netIncome, prog, baseTax, allowedFtc,
-        divInc, divCredAndWht, netTaxAfterCredits, retireGroup, thaiEsg
-      };
-    }
-
-    const scenInclude = runTaxScenario(true);
-    const scenExclude = runTaxScenario(false);
-    const divMode = document.getElementById('div_mode').value;
-
-    let activeScen = scenInclude;
-    if (divMode === 'exclude') activeScen = scenExclude;
-    else if (divMode === 'auto') {
-      activeScen = (scenInclude.netTaxAfterCredits <= scenExclude.netTaxAfterCredits) ? scenInclude : scenExclude;
-    }
-
-    if (totalDivRaw > 0) {
-      const diffSaving = scenExclude.netTaxAfterCredits - scenInclude.netTaxAfterCredits;
-      document.getElementById('div_advice').innerHTML = diffSaving >= 0
-        ? `<strong>คำแนะนำ: ควรนำเงินปันผลมารวมคำนวณ (มาตรา 47 ทวิ)</strong> เพราะได้รับเครดิตภาษีปันผล ${fmt(totalDivCredit)} บาท ช่วยประหยัดภาษี/ได้เงินคืนเพิ่มขึ้นสุทธิ <strong>${fmt(diffSaving)} บาท</strong>`
-        : `<strong>คำแนะนำ: ควรเลือกแยกยื่น Final Tax 10% (ไม่นำมารวม)</strong> เพราะฐานภาษีของคุณสูงกว่าเครดิตปันผล การแยกยื่นช่วยประหยัดภาษีได้มากกว่า <strong>${fmt(Math.abs(diffSaving))} บาท</strong>`;
-    } else {
-      document.getElementById('div_advice').innerHTML = `กรอกยอดเงินปันผลหุ้นไทยเพื่อเปรียบเทียบความคุ้มค่าระหว่างการขอเครดิตภาษี มาตรา 47 ทวิ กับการเลือก Final Tax 10%`;
-    }
-
-    // 6. คำนวณใบแนบเงินก้อนออกจากงาน (มาตรา 48(5))
-    const sevYears = val('sev_years');
-    const sevComp = Math.max(0, val('sev_compensation') - 600000); // ยกเว้น 600,000 บาทแรกสำหรับชดเชยเลิกจ้าง
-    const sevPvd = val('sev_pvd_payout');
-    const sevTotal = sevComp + sevPvd;
-    let sevTax = 0;
-    if (sevTotal > 0 && sevYears >= 5) {
-      const expStep1 = Math.min(sevTotal, 7000 * sevYears);
-      const rem1 = sevTotal - expStep1;
-      const expStep2 = rem1 * 0.50;
-      const sevNet = Math.max(0, rem1 - expStep2);
-      sevTax = calcProgressiveTax(sevNet, false).total; // ใบแนบไม่ยกเว้น 150,000 แรก (คิด 5% ทันที)
-      document.getElementById('sev_summary').innerHTML =
-        `ใช้สิทธิ์แยกคำนวณใบแนบ (อายุงาน ${sevYears} ปี): เงินได้สุทธิใบแนบ = <strong>${fmt(sevNet)} บาท</strong> | ภาษีตามใบแนบ = <strong>${fmt(sevTax)} บาท</strong>`;
-    } else if (sevTotal > 0) {
-      document.getElementById('sev_summary').innerHTML = `อายุงานต่ำกว่า 5 ปี ไม่เข้าเกณฑ์แยกยื่นใบแนบ ต้องนำไปรวมเป็นเงินได้ 40(1) ปกติ`;
-    } else {
-      document.getElementById('sev_summary').innerHTML = `ไม่มีรายการเงินได้ครั้งเดียวเพราะเหตุออกจากงาน`;
-    }
-
-    // 7. สรุปยอดชำระ/ขอคืน และเงินเพิ่มล่าช้า
-    const totalWht = val('wht_domestic') + val('sev_wht') + val('pnd94_paid');
-    const netPayableBeforeLate = activeScen.netTaxAfterCredits + sevTax - totalWht;
-    const lateMonths = val('late_months');
-    const surcharge = netPayableBeforeLate > 0 ? Math.min(netPayableBeforeLate, netPayableBeforeLate * 0.015 * lateMonths) : 0;
-    const finalBalance = netPayableBeforeLate + surcharge;
-
-    // อัปเดตหน้าจอสรุปผล
-    document.getElementById('out_dom_inc').textContent = fmt(domesticIncome) + ' บาท';
-    document.getElementById('out_fx_inc').textContent = fmt(taxableFxThb) + ' บาท';
-    document.getElementById('out_div_inc').textContent = fmt(activeScen.divInc) + ' บาท';
-    document.getElementById('out_crypto_inc').textContent = fmt(cryptoTaxable) + ' บาท';
-    document.getElementById('out_gross').textContent = fmt(activeScen.gross) + ' บาท';
-    document.getElementById('out_exp').textContent = fmt(totalExpense) + ' บาท';
-    document.getElementById('out_ded').textContent = fmt(activeScen.totalAllowancePreDon) + ' บาท';
-    document.getElementById('out_don').textContent = fmt(activeScen.totalDon) + ' บาท';
-    document.getElementById('out_net').textContent = fmt(activeScen.netIncome) + ' บาท';
-    document.getElementById('out_base_tax').textContent = fmt(activeScen.baseTax) + ' บาท';
-    document.getElementById('out_sev_tax').textContent = fmt(sevTax) + ' บาท';
-    document.getElementById('out_ftc').textContent = fmt(activeScen.allowedFtc) + ' บาท';
-    document.getElementById('out_div_credit').textContent = fmt(activeScen.divCredAndWht) + ' บาท';
-    document.getElementById('out_wht_total').textContent = fmt(totalWht) + ' บาท';
-    document.getElementById('out_surcharge').textContent = fmt(surcharge) + ' บาท';
-    document.getElementById('out_brackets').innerHTML = activeScen.prog.rows;
-
-    const statusEl = document.getElementById('out_final_status');
-    if (finalBalance > 0) {
-      statusEl.textContent = `ต้องชำระภาษีเพิ่มเติม: ${fmt(finalBalance)} บาท`;
-      statusEl.style.color = '#f87171';
-    } else if (finalBalance < 0) {
-      statusEl.textContent = `มีสิทธิ์ได้รับเงินคืนภาษี: ${fmt(Math.abs(finalBalance))} บาท`;
-      statusEl.style.color = '#4ade80';
-    } else {
-      statusEl.textContent = `ชำระภาษีครบถ้วนพอดี (0.00 บาท)`;
-      statusEl.style.color = '#38bdf8';
-    }
-
-    const effRate = activeScen.gross > 0 ? ((activeScen.baseTax / activeScen.gross) * 100).toFixed(2) : '0.00';
-    const margRate = (activeScen.prog.marginalRate * 100).toFixed(0);
-    document.getElementById('out_effective_rate').textContent =
-      `ฐานภาษีสูงสุด (Marginal Tax Rate): ${margRate}% | อัตราภาษีเฉลี่ยต่อรายได้รวม (Effective Tax Rate): ${effRate}%`;
-
-    // คำแนะนำวางแผนภาษีอัตโนมัติ (Expert Financial Advisor)
-    const remThaiEsg = Math.max(0, Math.min(activeScen.gross * 0.30, 300000) - activeScen.thaiEsg);
-    const remRetire = Math.max(0, 500000 - activeScen.retireGroup);
-    const potentialTaxSaved = (remThaiEsg + remRetire) * activeScen.prog.marginalRate;
-    document.getElementById('out_advisor').innerHTML =
-      `<strong>Expert Financial Tax Optimization:</strong><br>` +
-      `• เพดานซื้อ <strong>Thai ESG</strong> คงเหลือ: <strong>${fmt(remThaiEsg)} บาท</strong><br>` +
-      `• เพดานกลุ่มเกษียณ (RMF/PVD/บำนาญ) คงเหลือ: <strong>${fmt(remRetire)} บาท</strong><br>` +
-      `• หากใช้สิทธิ์ลดหย่อนที่เหลือเต็มเพดานที่ฐานภาษี ${margRate}% จะช่วยประหยัดภาษีเพิ่มได้อีกสูงสุดประมาณ <strong>${fmt(potentialTaxSaved)} บาท</strong>`;
-  }
-
-  async function parsePDF(event) {
+  // ฟังก์ชันอ่านไฟล์ PDF ของ Dime! ด้วย Regex เฉพาะของ KKP Dime
+  async function parseDimePDF(event) {
     const files = event.target.files;
     if (!files.length) return;
-    const statusEl = document.getElementById('pdfStatus');
-    statusEl.textContent = `กำลังสกัดข้อมูลจากไฟล์ PDF ${files.length} ไฟล์...`;
-    let inc1 = 0, inc2 = 0, wht = 0, sso = 0, pvd = 0;
+    const log = document.getElementById('dimeLog');
+    log.textContent = `กำลังอ่านไฟล์ PDF ของแอป Dime! จำนวน ${files.length} ไฟล์...\n`;
+    dimeState = { fxList: [], rawTrades: [], divList: [] };
 
     for (const file of files) {
       const buf = await file.arrayBuffer();
@@ -741,27 +357,254 @@
         const content = await page.getTextContent();
         text += content.items.map(it => it.str).join(' ') + '\n';
       }
-      const getNum = (re) => {
-        const m = text.match(re);
-        return (m && m[1]) ? (parseFloat(m[1].replace(/,/g, '')) || 0) : 0;
-      };
-      inc1 += getNum(/40\s*\(\s*1\s*\)[^\d]*([\d,]+\.\d{2})/);
-      inc2 += getNum(/40\s*\(\s*2\s*\)[^\d]*([\d,]+\.\d{2})/);
-      sso += getNum(/ประกันสังคม[^\d]*([\d,]+(?:\.\d{2})?)/);
-      pvd += getNum(/กองทุนสำรองเลี้ยงชีพ[^\d]*([\d,]+(?:\.\d{2})?)/);
-      wht += getNum(/รวมเงินที่จ่ายและภาษีที่นำส่ง[^\d]*[\d,]+\.\d{2}\s+([\d,]+\.\d{2})/);
-    }
-    if (inc1 > 0) document.getElementById('m40_1').value = inc1;
-    if (inc2 > 0) document.getElementById('m40_2').value = inc2;
-    if (wht > 0) document.getElementById('wht_domestic').value = wht;
-    if (sso > 0) document.getElementById('d_sso').value = Math.min(sso, 9000);
-    if (pvd > 0) document.getElementById('d_pvd').value = pvd;
 
-    statusEl.textContent = `✔ สกัดข้อมูลสำเร็จ: 40(1)=${fmt(inc1)}, 40(2)=${fmt(inc2)}, หัก ณ ที่จ่าย=${fmt(wht)}, ประกันสังคม=${fmt(sso)}, PVD=${fmt(pvd)}`;
-    recalc();
+      // Regex 1: ดึงรายการแลกเงิน THB <-> USD ในแอป Dime!
+      const fxOutRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:THB to USD|แลกเงินบาทเป็นดอลลาร์|Buy USD).*?([\d,]+\.\d{2})\s*USD.*?([\d]{2}\.\d{2,4})/gi;
+      let m;
+      while ((m = fxOutRe.exec(text)) !== null) {
+        dimeState.fxList.push({ date: m[1], dir: 'THB_TO_USD', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
+      }
+
+      const fxInRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:USD to THB|แลกดอลลาร์เป็นเงินบาท|Sell USD).*?([\d,]+\.\d{2})\s*USD.*?([\d]{2}\.\d{2,4})/gi;
+      while ((m = fxInRe.exec(text)) !== null) {
+        dimeState.fxList.push({ date: m[1], dir: 'USD_TO_THB', usd: parseFloat(m[2].replace(/,/g, '')), rate: parseFloat(m[3]) });
+      }
+
+      // Regex 2: ดึงรายการซื้อ-ขายหุ้นเศษส่วน (Fractional Shares 7 ตำแหน่งของ Dime!)
+      const tradeRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})\s+(BUY|SELL)\s+([A-Z]{1,5})\s+(\d+\.\d{2,7})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})/gi;
+      while ((m = tradeRe.exec(text)) !== null) {
+        dimeState.rawTrades.push({
+          date: m[1],
+          side: m[2].toUpperCase(),
+          ticker: m[3].toUpperCase(),
+          shares: parseFloat(m[4]),
+          price: parseFloat(m[5].replace(/,/g, '')),
+          amountUsd: parseFloat(m[6].replace(/,/g, ''))
+        });
+      }
+
+      // Regex 3: ดึงเงินปันผลและภาษีหัก ณ ที่จ่าย 15% ใน Dime!
+      const divRe = /(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2}).*?(?:Dividend|ปันผล)\s+([A-Z]{1,5}).*?\$?([\d,]+\.\d{2}).*?\$?([\d,]+\.\d{2})/gi;
+      while ((m = divRe.exec(text)) !== null) {
+        dimeState.divList.push({
+          date: m[1],
+          ticker: m[2],
+          grossUsd: parseFloat(m[3].replace(/,/g, '')),
+          whtUsd: parseFloat(m[4].replace(/,/g, ''))
+        });
+      }
+      log.textContent += `✔ สกัดข้อมูลจาก "${file.name}" สำเร็จ\n`;
+    }
+    calcDimeTax();
   }
 
-  recalc();
+  // จำลองข้อมูลจริงจากสเตทเมนต์แอป Dime! (มีทศนิยมเศษหุ้น DCA + แลกเงิน + ปันผล)
+  function loadDimeSample() {
+    dimeState = {
+      fxList: [
+        { date: '2026-01-10', dir: 'THB_TO_USD', usd: 3000.00, rate: 34.45 },
+        { date: '2026-03-05', dir: 'THB_TO_USD', usd: 2000.00, rate: 34.60 },
+        { date: '2026-09-20', dir: 'USD_TO_THB', usd: 4500.00, rate: 33.85 },
+        { date: '2026-10-12', dir: 'USD_TO_THB', usd: 1800.00, rate: 33.50 }
+      ],
+      rawTrades: [
+        { date: '2026-01-12', side: 'BUY',  ticker: 'NVDA', shares: 15.5000000, price: 100.00, amountUsd: 1550.00 },
+        { date: '2026-03-10', side: 'BUY',  ticker: 'NVDA', shares: 10.2500000, price: 120.00, amountUsd: 1230.00 },
+        { date: '2026-08-15', side: 'SELL', ticker: 'NVDA', shares: 20.0000000, price: 145.00, amountUsd: 2900.00 },
+        { date: '2026-02-01', side: 'BUY',  ticker: 'TSLA', shares: 8.1250000,  price: 220.00, amountUsd: 1787.50 },
+        { date: '2026-07-20', side: 'SELL', ticker: 'TSLA', shares: 8.1250000,  price: 190.00, amountUsd: 1543.75 },
+        { date: '2026-04-01', side: 'BUY',  ticker: 'AAPL', shares: 12.0000000, price: 175.00, amountUsd: 2100.00 },
+        { date: '2026-09-18', side: 'SELL', ticker: 'AAPL', shares: 12.0000000, price: 225.00, amountUsd: 2700.00 }
+      ],
+      divList: [
+        { date: '2026-05-16', ticker: 'AAPL (Dividend)', grossUsd: 48.00, whtUsd: 7.20 },
+        { date: '2026-06-28', ticker: 'NVDA (Dividend)', grossUsd: 22.00, whtUsd: 3.30 },
+        { date: '2026-08-30', ticker: 'Dime! FCD USD Interest', grossUsd: 85.00, whtUsd: 0.00 }
+      ]
+    };
+
+    document.getElementById('dimeLog').textContent =
+      `✔ [จำลองการสกัดด้วย Regex จากไฟล์ PDF ของแอป Dime! สำเร็จ]\n` +
+      `   • ดึงรายการแลกเงิน THB ➔ USD รวม $5,000.00 (เก็บเป็นวงเงินต้นปลอดภาษี)\n` +
+      `   • คำนวณต้นทุนเศษหุ้นแบบ FIFO (เช่น NVDA ซื้อ 2 รอบที่ $100 และ $120 แล้วขายออก 20 หุ้นที่ $145)\n` +
+      `   • ดึงรายการแลกเงิน USD ➔ THB กลับเข้าบัญชีไทยรวม $6,300.00 -> หักเงินต้นออก $5,000.00 เหลือส่วนที่เป็นกำไรนำเข้าไทย $1,300.00`;
+
+    calcDimeTax();
+  }
+
+  function calcDimeTax() {
+    // 1. คำนวณ FIFO สำหรับหุ้นแต่ละตัว
+    const inventory = {}; // ticker -> [{ shares, costPerShare }]
+    let totalRealizedGain = 0;
+    let totalRealizedLoss = 0;
+
+    const tradeRowsHtml = dimeState.rawTrades.map(t => {
+      if (!inventory[t.ticker]) inventory[t.ticker] = [];
+      let pnlCell = `<span style="color:#64748b;">- (ตั้งต้นทุน FIFO)</span>`;
+
+      if (t.side === 'BUY') {
+        inventory[t.ticker].push({ shares: t.shares, costPerShare: t.amountUsd / t.shares });
+      } else if (t.side === 'SELL') {
+        let remToSell = t.shares;
+        let fifoCostBasis = 0;
+        const lots = inventory[t.ticker];
+        while (remToSell > 1e-7 && lots.length > 0) {
+          const lot = lots[0];
+          const take = Math.min(remToSell, lot.shares);
+          fifoCostBasis += take * lot.costPerShare;
+          lot.shares -= take;
+          remToSell -= take;
+          if (lot.shares <= 1e-7) lots.shift();
+        }
+        const pnl = t.amountUsd - fifoCostBasis;
+        if (pnl >= 0) {
+          totalRealizedGain += pnl;
+          pnlCell = `<span class="badge b-gain">+$${fmt(pnl)} (ทุน FIFO $${fmt(fifoCostBasis)})</span>`;
+        } else {
+          totalRealizedLoss += Math.abs(pnl);
+          pnlCell = `<span class="badge b-loss">-$${fmt(Math.abs(pnl))} (ทุน FIFO $${fmt(fifoCostBasis)})</span>`;
+        }
+      }
+
+      return `<tr>
+        <td>${t.date}</td>
+        <td><strong>${t.ticker}</strong></td>
+        <td style="text-align:center;"><span class="badge ${t.side === 'BUY' ? 'b-buy' : 'b-sell'}">${t.side}</span></td>
+        <td>${fmt(t.shares, 7)}</td>
+        <td>$${fmt(t.price)}</td>
+        <td>$${fmt(t.amountUsd)}</td>
+        <td style="text-align:right;">${pnlCell}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('tb_trades').innerHTML = tradeRowsHtml;
+
+    // 2. คำนวณตารางแลกเงิน THB <-> USD ในแอป Dime!
+    let outUsd = 0, outThb = 0, inUsd = 0, inThbWeighted = 0;
+    let runningPrin = 0;
+    const fxRowsHtml = dimeState.fxList.map(f => {
+      const thb = f.usd * f.rate;
+      let status = '';
+      if (f.dir === 'THB_TO_USD') {
+        outUsd += f.usd;
+        outThb += thb;
+        runningPrin += f.usd;
+        status = `<span class="badge b-buy">สะสมเงินต้นปลอดภาษี ($${fmt(runningPrin)})</span>`;
+      } else {
+        inUsd += f.usd;
+        inThbWeighted += thb;
+        const prinUsed = Math.min(runningPrin, f.usd);
+        const profitPart = Math.max(0, f.usd - prinUsed);
+        runningPrin -= prinUsed;
+        status = profitPart > 0
+          ? `<span class="badge b-gain">คืนเงินต้น $${fmt(prinUsed)} + กำไรต้องเสียภาษี $${fmt(profitPart)}</span>`
+          : `<span class="badge b-buy">คืนเงินต้นทั้งจำนวน $${fmt(prinUsed)} (ไม่เสียภาษี)</span>`;
+      }
+      return `<tr>
+        <td>${f.date}</td>
+        <td>${f.dir === 'THB_TO_USD' ? 'แลก THB ➔ USD (ฝากเข้าพอร์ต)' : 'แลก USD ➔ THB (ถอนกลับไทย)'}</td>
+        <td>$${fmt(f.usd)}</td>
+        <td>${fmt(f.rate)}</td>
+        <td>${fmt(thb)} บาท</td>
+        <td style="text-align:left;">${status}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('tb_fx').innerHTML = fxRowsHtml;
+
+    // 3. ตารางปันผลและดอกเบี้ย USD
+    let grossDivUsd = 0, whtUsd = 0;
+    const divRowsHtml = dimeState.divList.map(d => {
+      grossDivUsd += d.grossUsd;
+      whtUsd += d.whtUsd;
+      return `<tr>
+        <td>${d.date}</td>
+        <td><strong>${d.ticker}</strong></td>
+        <td>$${fmt(d.grossUsd)}</td>
+        <td style="color:#d97706;">-$${fmt(d.whtUsd)}</td>
+        <td style="font-weight:700;">$${fmt(d.grossUsd - d.whtUsd)}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('tb_divs').innerHTML = divRowsHtml;
+
+    // 4. สรุปยอดกำไรสุทธิที่แลกกลับเป็นเงินบาทและคำนวณภาษี ภ.ง.ด. 90
+    const netFifoPnlUsd = Math.max(0, totalRealizedGain - totalRealizedLoss);
+    const totalPortProfitUsd = netFifoPnlUsd + grossDivUsd;
+    const avgInRate = inUsd > 0 ? (inThbWeighted / inUsd) : 33.80;
+
+    const prinReturnedUsd = Math.min(outUsd, inUsd);
+    const excessInUsd = Math.max(0, inUsd - prinReturnedUsd);
+    const taxableUsd = Math.min(excessInUsd, totalPortProfitUsd);
+    const taxableThb = taxableUsd * avgInRate;
+
+    const remitRatio = totalPortProfitUsd > 0 ? Math.min(1, taxableUsd / totalPortProfitUsd) : 0;
+    const ftcEligibleThb = (whtUsd * remitRatio) * avgInRate;
+
+    // อัปเดต KPI
+    document.getElementById('k_fx_out').textContent = `$${fmt(outUsd)}`;
+    document.getElementById('k_fx_out_thb').textContent = `เงินต้นสะสม: ${fmt(outThb)} บาท`;
+    document.getElementById('k_fifo_pnl').textContent = `$${fmt(netFifoPnlUsd)}`;
+    document.getElementById('k_fifo_detail').textContent = `กำไร +$${fmt(totalRealizedGain)} | ขาดทุน -$${fmt(totalRealizedLoss)}`;
+    document.getElementById('k_div_int').textContent = `$${fmt(grossDivUsd)}`;
+    document.getElementById('k_wht').textContent = `หัก ณ ที่จ่าย US (15%): $${fmt(whtUsd)}`;
+    document.getElementById('k_fx_in').textContent = `$${fmt(inUsd)}`;
+    document.getElementById('k_taxable_thb').textContent = `กำไรส่วนที่ต้องเสียภาษี: ${fmt(taxableThb)} บาท`;
+
+    // คำนวณภาษี ภ.ง.ด. 90
+    const salary = parseFloat(document.getElementById('in_salary').value) || 0;
+    const whtTh = parseFloat(document.getElementById('in_wht').value) || 0;
+    const deduct = parseFloat(document.getElementById('in_deduct').value) || 0;
+
+    const grossThb = salary + taxableThb;
+    const expThb = Math.min(salary * 0.50, 100000);
+    const netThb = Math.max(0, grossThb - expThb - deduct);
+
+    const brackets = [
+      { min: 0, max: 150000, r: 0 },
+      { min: 150000, max: 300000, r: 0.05 },
+      { min: 300000, max: 500000, r: 0.10 },
+      { min: 500000, max: 750000, r: 0.15 },
+      { min: 750000, max: 1000000, r: 0.20 },
+      { min: 1000000, max: 2000000, r: 0.25 },
+      { min: 2000000, max: 5000000, r: 0.30 },
+      { min: 5000000, max: Infinity, r: 0.35 }
+    ];
+    let progTax = 0;
+    for (const b of brackets) {
+      progTax += Math.max(0, Math.min(netThb, b.max) - b.min) * b.r;
+    }
+
+    const avgTaxRate = grossThb > 0 ? (progTax / grossThb) : 0;
+    const ftcAllowed = Math.min(ftcEligibleThb, taxableThb * avgTaxRate);
+    const finalDiff = progTax - ftcAllowed - whtTh;
+
+    document.getElementById('s_salary').textContent = `${fmt(salary)} บาท`;
+    document.getElementById('s_fifo_gain').textContent = `$${fmt(netFifoPnlUsd)}`;
+    document.getElementById('s_div_usd').textContent = `$${fmt(grossDivUsd)}`;
+    document.getElementById('s_in_usd').textContent = `$${fmt(inUsd)}`;
+    document.getElementById('s_prin_usd').textContent = `$${fmt(prinReturnedUsd)}`;
+    document.getElementById('s_tax_fx_thb').textContent = `${fmt(taxableThb)} บาท`;
+    document.getElementById('s_gross').textContent = `${fmt(grossThb)} บาท`;
+    document.getElementById('s_exp').textContent = `${fmt(expThb)} บาท`;
+    document.getElementById('s_ded').textContent = `${fmt(deduct)} บาท`;
+    document.getElementById('s_net').textContent = `${fmt(netThb)} บาท`;
+    document.getElementById('s_tax_prog').textContent = `${fmt(progTax)} บาท`;
+    document.getElementById('s_ftc').textContent = `${fmt(ftcAllowed)} บาท`;
+    document.getElementById('s_wht_th').textContent = `${fmt(whtTh)} บาท`;
+
+    const finalEl = document.getElementById('s_final');
+    if (finalDiff > 0) {
+      finalEl.textContent = `ชำระภาษีเพิ่มสุทธิ: ${fmt(finalDiff)} บาท`;
+      finalEl.style.color = '#f87171';
+    } else {
+      finalEl.textContent = `ได้รับเงินคืนภาษีสุทธิ: ${fmt(Math.abs(finalDiff))} บาท`;
+      finalEl.style.color = '#00d66c';
+    }
+
+    document.getElementById('s_note').innerHTML =
+      `<strong>ทริคสำคัญสำหรับคนใช้แอป Dime!:</strong><br>` +
+      `• หากคุณขายหุ้นใน Dime! ได้กำไรเป็นดอลลาร์ (USD) และพักไว้ในกระเป๋า <strong>Dime! FCD (บัญชีเงินฝากเงินตราต่างประเทศ)</strong> โดยยังไม่ได้กดแลกกลับมาเป็นเงินบาท (USD ➔ THB) ยอดกำไรจากการขายหุ้นในพอร์ตนั้นจะ <strong>ยังไม่ต้องนำมายื่นเสียภาษีในปีนั้น</strong> จนกว่าจะแลกกลับมาเป็นเงินบาทเข้าบัญชีไทยครับ`;
+  }
+
+  loadDimeSample();
 </script>
 </body>
 </html>
